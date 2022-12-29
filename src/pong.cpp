@@ -1,15 +1,14 @@
 #include "pong.h"
-#include "SDL2/SDL_events.h"
-#include "SDL2/SDL_render.h"
+#include "SDL2/SDL_rect.h"
 
 void input() {
-    SDL_Event e;
+    SDL_Event event;
     const Uint8 *keystates = SDL_GetKeyboardState(NULL);
     /* left_paddle_vel = 0; */
     /* right_paddle_vel = 0; */
-    while (SDL_PollEvent(&e)) {
-        if (e.type == SDL_KEYUP) {
-            std::cout << "Key up" << std::endl;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_KEYUP) {
+            /* std::cout << "Key up" << std::endl; */
             if (!keystates[SDL_SCANCODE_UP] && left_paddle_vel < 0) {
                 left_paddle_vel = 0;
             }
@@ -17,8 +16,8 @@ void input() {
                 left_paddle_vel = 0;
             }
         }
-        if (e.type == SDL_KEYDOWN) {
-            std::cout << "Key down" << std::endl;
+        if (event.type == SDL_KEYDOWN) {
+            /* std::cout << "Key down" << std::endl; */
             if (keystates[SDL_SCANCODE_UP]) {
                 left_paddle_vel = -PADDLE_SPEED;
             }
@@ -26,7 +25,7 @@ void input() {
                 left_paddle_vel = PADDLE_SPEED;
             }
         }
-        if (e.type == SDL_QUIT)
+        if (event.type == SDL_QUIT)
             running = false;
         if (keystates[SDL_SCANCODE_ESCAPE])
             running = false;
@@ -38,14 +37,65 @@ void input() {
 void update() {
     score = std::to_string(left_score) + "  " + std::to_string(right_score);
     left_paddle.y += left_paddle_vel;
+    ball.x += vel_x;
+    ball.y += vel_y;
+    // Robot player
+    if (ball.y > right_paddle.y + (right_paddle.h / 2)) {
+        right_paddle.y += PADDLE_SPEED;
+    }
+    if (ball.y < right_paddle.y + (right_paddle.h / 2)) {
+        right_paddle.y -= PADDLE_SPEED;
+    }
+    // Prevent the paddles from going off-screen
+    if (left_paddle.y > (HEIGHT - left_paddle.h)) {
+        left_paddle.y = (HEIGHT - left_paddle.h);
+    }
+    if (left_paddle.y < 0) {
+        left_paddle.y = 0;
+    }
+    if (right_paddle.y > (HEIGHT - right_paddle.h)) {
+        right_paddle.y = (HEIGHT - right_paddle.h);
+    }
+    if (right_paddle.y < 0) {
+        right_paddle.y = 0;
+    }
+    // Bounce agaist horizontal walls.
+    if (ball.y <= 0 || ball.y >= (HEIGHT - ball.h)) {
+        vel_y = -vel_y;
+    }
+    // Point scored by one of the players.
+    if (ball.x <= 0) {
+        right_score++;
+        ball.x = WIDTH / 2 - ball.w / 2;
+        ball.y = HEIGHT / 2 - ball.h / 2;
+    }
+    if (ball.x >= (WIDTH - ball.w)) {
+        left_score++;
+        ball.x = WIDTH / 2 - ball.w / 2;
+        ball.y = HEIGHT / 2 - ball.h / 2;
+    }
+    // Collision detection
+    if (SDL_HasIntersection(&ball, &left_paddle)) {
+        int rel = (left_paddle.y + left_paddle.h / 2) - (ball.y + ball.h / 2);
+        vel_y = -rel / PXLH * 2;
+        vel_x = -vel_x;
+    }
+    if (SDL_HasIntersection(&ball, &right_paddle)) {
+        int rel = (right_paddle.y + right_paddle.h / 2) - (ball.y + ball.h / 2);
+        vel_y = -rel / PXLH * 2;
+        vel_x = -vel_x;
+    }
+    std::cout << vel_x << ", " << vel_y << std::endl;
 }
 
 void serve() {
     left_paddle.y = right_paddle.y = (HEIGHT / 2) - (left_paddle.h / 2);
     if (turn) {
         ball.x = left_paddle.x + (left_paddle.w * 4);
+        vel_x = BALL_SPEED / 2;
     } else {
         ball.x = right_paddle.x - (right_paddle.w * 4);
+        vel_x = -BALL_SPEED / 2;
     }
     ball.y = HEIGHT / 2 - (ball.h / 2);
     vel_x = BALL_SPEED / 2.0;
@@ -54,7 +104,6 @@ void serve() {
 }
 
 void draw() {
-    input();
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);
     SDL_RenderClear(renderer);
     /* right_paddle.y += 1; */
@@ -67,15 +116,16 @@ void draw() {
     // Set the current render color.
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
     // Draw the scores
-    drawLabel(score, WIDTH / 2, 2*PXLH);
+    drawLabel(score, WIDTH / 2, 2 * PXLH);
     SDL_RenderFillRect(renderer, &left_paddle);
     SDL_RenderFillRect(renderer, &right_paddle);
     SDL_RenderFillRect(renderer, &ball);
     // Render net
     SDL_Rect block;
-    block.w = block.h = PXLW;
+    block.w = PXLW / 4;
+    block.h = PXLH;
     block.x = WIDTH / 2 - block.w / 2;
-    for (int i = 0; i < HEIGHT; i += 8 * PXLH) {
+    for (int i = 0; i < HEIGHT; i += 3 * PXLH) {
         block.y = i;
         SDL_RenderFillRect(renderer, &block);
     }
@@ -97,7 +147,7 @@ void drawLabel(std::string text, int x, int y) {
     SDL_DestroyTexture(texture);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     int status = SDL_Init(SDL_INIT_EVERYTHING);
     if (status < 0) {
         std::cerr << "Failed at SDL_Init()" << std::endl;
@@ -113,17 +163,18 @@ int main() {
     color.r = 255;
     color.g = 255;
     color.b = 255;
-    left_paddle.w = PXLW * 2;
-    left_paddle.h = 24 * PXLH;
-    left_paddle.x = 3*PXLW;
+    left_paddle.w = PXLW;
+    left_paddle.h = PXLH * 5;
+    left_paddle.x = 9 * PXLW;
     left_paddle.y = HEIGHT / 2 - left_paddle.h / 2;
     right_paddle = left_paddle;
-    right_paddle.x = WIDTH - 3*PXLW - right_paddle.w;
-    left_paddle.y = 0;
-    ball.w = 2 * PXLW;
-    ball.h = 2 * PXLW;
-    ball.x = WIDTH / 2;
-    ball.y = HEIGHT / 2;
+    right_paddle.x = WIDTH - left_paddle.x - right_paddle.w;
+    ball.w = PXLW;
+    ball.h = PXLH;
+    ball.x = WIDTH / 2 - ball.w / 2;
+    ball.y = HEIGHT / 2 - ball.h / 2;
+    vel_x = -BALL_SPEED;
+    vel_y = 1;
 
     running = true;
     while (running) {

@@ -1,20 +1,21 @@
-#include "SDL2/SDL_keyboard.h"
-#include "SDL2/SDL_render.h"
+#ifndef PONG_H_FILE
+#define PONG_H_FILE
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 
-#define WIDTH 640
-#define HEIGHT 480
+#define WIDTH 1000
+#define HEIGHT 800 
 #define FONT_SIZE 64
 
-#define OWIDTH 160
-#define OHEIGHT 192
+#define OWIDTH 100
+#define OHEIGHT 80
 
 const int PXLW = WIDTH / OWIDTH;
 const int PXLH = HEIGHT / OHEIGHT;
 const int BALL_SPEED = PXLW;
-const int PADDLE_SPEED = PXLH * 2;
+const int PADDLE_SPEED = PXLW * 2;
 
 SDL_Renderer *renderer;
 SDL_Window *window;
@@ -33,8 +34,8 @@ int left_paddle_vel;
 int right_paddle_vel;
 SDL_Rect ball;
 SDL_Rect score_board;
-float vel_x;
-float vel_y;
+int vel_x;
+int vel_y;
 std::string score;
 int left_score;
 int right_score;
@@ -46,4 +47,6 @@ void update();
 void draw();
 void drawLabel(std::string text, int x, int y);
 
-int main();
+int main(int argc, char *argv[]);
+
+#endif
