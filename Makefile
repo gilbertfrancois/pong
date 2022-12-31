@@ -1,12 +1,21 @@
-FLAGS=-std=c++11 -g -Wall
+CC_FLAGS=-O2 -Wall
+CC_DEBUG_FLAGS=-g -Wall
 
-# INCLUDE_PATHS=-I/opt/homebrew/include
-# LIB_PATHS=-L/opt/homebrew/lib
-INCLUDE_PATHS=-I/usr/local/include
-LIB_PATHS=-L/usr/local/lib
+INCLUDE_PATHS=-I/opt/homebrew/include
+LIB_PATHS=-L/opt/homebrew/lib
+# INCLUDE_PATHS=-I/usr/local/include
+# LIB_PATHS=-L/usr/local/lib
 
 all:
-	c++ ${FLAGS} src/pong.cpp ${INCLUDE_PATHS} ${LIB_PATHS} -lSDL2 -lSDL2_ttf -o build/pong	
+	mkdir -p build/c
+	cc ${CC_FLAGS} src/c/pong.c ${INCLUDE_PATHS} ${LIB_PATHS} -lSDL2 -lSDL2_ttf -o build/c/pong	
 
+debug:
+	mkdir -p build/c
+	cc ${CC_DEBUG_FLAGS} src/c/pong.c ${INCLUDE_PATHS} ${LIB_PATHS} -lSDL2 -lSDL2_ttf -o build/c/pong	
+	
+static:
+	mkdir -p build/c
+	cc ${CC_FLAGS} src/c/pong.c ${INCLUDE_PATHS} ${LIB_PATHS} -lSDL2.a -lSDL2_ttf.a -o build/c/pong	
 clean:
-	rm -Rf build/*
+	rm -Rf build/c/
