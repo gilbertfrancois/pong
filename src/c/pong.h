@@ -8,17 +8,19 @@
 #include <stdlib.h>
 
 #define WITH_FULLSCREEN true
-#define WIDTH 500
-#define HEIGHT 400
-#define FONT_SIZE 64
+/* #define WIDTH 500 */
+/* #define HEIGHT 400 */
+const int FONT_SIZE = 64;
 
-#define OWIDTH 100
-#define OHEIGHT 80
-
-const int PXLW = WIDTH / OWIDTH;
-const int PXLH = HEIGHT / OHEIGHT;
-const int BALL_SPEED = PXLW;
-const int PADDLE_SPEED = PXLW * 2;
+const int retro_disp_w = 100;
+const int retro_disp_h = 80;
+int display_w = 1920;
+int display_h = 1080;
+int offset = 0;
+int pixel_w; //display_w / retro_disp_w;
+int pixel_h; //display_h / retro_disp_h;
+int BALL_SPEED;
+int PADDLE_SPEED;
 
 typedef struct {
     int x;
@@ -49,12 +51,11 @@ char *score;
 int left_score;
 int right_score;
 
-int init_av(SDL_Renderer *renderer, SDL_Window *window,
-            const bool with_fullscreen);
 int init_mouse(SDL_Window *window, Mouse *mouse);
 
 void input(SDL_Window *window, Mouse *mouse, Paddle *left_paddle,
            Paddle *right_paddle, bool *running);
+void update_display_size(SDL_Window *window);
 void update(SDL_Window *window, Mouse *mouse, Ball *ball, Paddle *left_paddle,
             Paddle *right_paddle);
 void draw(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color, Ball *ball,

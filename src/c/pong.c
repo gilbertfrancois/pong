@@ -1,12 +1,12 @@
 #include "pong.h"
 #include "SDL2/SDL_render.h"
+#include "SDL2/SDL_video.h"
 
-void input(SDL_Window *window, Mouse *mouse, Paddle *left_paddle, Paddle *right_paddle,
-           bool *running) {
+void handle_events(SDL_Window *window, Mouse *mouse, Paddle *left_paddle,
+                   Paddle *right_paddle, bool *running) {
     SDL_Event event;
     const Uint8 *keystates = SDL_GetKeyboardState(NULL);
-    /* left_paddle->vy = 0; */
-    /* right_paddle->vy = 0; */
+    // Handle keyboard events
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_KEYUP) {
             if (!keystates[SDL_SCANCODE_UP] && left_paddle->kb_vy < 0) {
@@ -35,19 +35,18 @@ void input(SDL_Window *window, Mouse *mouse, Paddle *left_paddle, Paddle *right_
         if (keystates[SDL_SCANCODE_Q])
             *running = false;
     }
-
+    // Allow mouse and keyboard input at the same time. Keep the mouse position
+    // in sync.
     if (mouse->needs_warp) {
-        SDL_WarpMouseInWindow(window, WIDTH / 2,
+        SDL_WarpMouseInWindow(window, display_w / 2,
                               left_paddle->rect.y + left_paddle->rect.h / 2);
     }
-    // Allow mouse and keyboard input at the same time. Keep the mouse position in sync.
     int x = 0;
     int y = 0;
     SDL_GetMouseState(&x, &y);
     if (!mouse->needs_warp && left_paddle->kb_vy == 0) {
         left_paddle->ms_vy = (y - mouse->y);
-    }
-    else {
+    } else {
         left_paddle->ms_vy = 0;
     }
     if (mouse->needs_warp) {
@@ -56,9 +55,18 @@ void input(SDL_Window *window, Mouse *mouse, Paddle *left_paddle, Paddle *right_
     mouse->y = y;
 }
 
+// Update display size in case the user has changed it.
+void update_display_size(SDL_Window *window) {
+    SDL_GetWindowSize(window, &display_w, &display_h);
+    pixel_w = display_w / retro_disp_w;
+    pixel_h = display_h / retro_disp_h;
+    BALL_SPEED = pixel_w;
+    PADDLE_SPEED = pixel_w * 2;
+}
 
 void update(SDL_Window *window, Mouse *mouse, Ball *ball, Paddle *left_paddle,
             Paddle *right_paddle) {
+
     char _score[] = "0  0";
     score = _score;
     // Update paddle position
@@ -74,14 +82,14 @@ void update(SDL_Window *window, Mouse *mouse, Ball *ball, Paddle *left_paddle,
         right_paddle->rect.y -= BALL_SPEED;
     }
     // Prevent the paddles from going off-screen
-    if (left_paddle->rect.y > (HEIGHT - left_paddle->rect.h)) {
-        left_paddle->rect.y = (HEIGHT - left_paddle->rect.h);
+    if (left_paddle->rect.y > (display_h - left_paddle->rect.h)) {
+        left_paddle->rect.y = (display_h - left_paddle->rect.h);
     }
     if (left_paddle->rect.y < 0) {
         left_paddle->rect.y = 0;
     }
-    if (right_paddle->rect.y > (HEIGHT - right_paddle->rect.h)) {
-        right_paddle->rect.y = (HEIGHT - right_paddle->rect.h);
+    if (right_paddle->rect.y > (display_h - right_paddle->rect.h)) {
+        right_paddle->rect.y = (display_h - right_paddle->rect.h);
     }
     if (right_paddle->rect.y < 0) {
         right_paddle->rect.y = 0;
@@ -91,22 +99,22 @@ void update(SDL_Window *window, Mouse *mouse, Ball *ball, Paddle *left_paddle,
         ball->vy = -ball->vy;
         ball->rect.y = 0;
     }
-    if (ball->rect.y >= (HEIGHT - ball->rect.h)) {
+    if (ball->rect.y >= (display_h - ball->rect.h)) {
         ball->vy = -ball->vy;
-        ball->rect.y = HEIGHT - ball->rect.h;
+        ball->rect.y = display_h - ball->rect.h;
     }
     // Point scored by one of the players.
     if (ball->rect.x <= 0) {
         right_score++;
-        ball->rect.x = WIDTH / 2 - ball->rect.w / 2;
+        ball->rect.x = display_w / 2 - ball->rect.w / 2;
         ball->rect.y =
             right_paddle->rect.y - right_paddle->rect.h / 2 + ball->rect.h / 2;
         ball->vy = ((rand() % 2) - 1) * BALL_SPEED;
         ball->vx = -BALL_SPEED;
     }
-    if (ball->rect.x >= (WIDTH - ball->rect.w)) {
+    if (ball->rect.x >= (display_w - ball->rect.w)) {
         left_score++;
-        ball->rect.x = WIDTH / 2 - ball->rect.w / 2;
+        ball->rect.x = display_w / 2 - ball->rect.w / 2;
         ball->rect.y =
             left_paddle->rect.y - left_paddle->rect.h / 2 + ball->rect.h / 2;
         ball->vy = ((rand() % 2) - 1) * BALL_SPEED;
@@ -116,14 +124,14 @@ void update(SDL_Window *window, Mouse *mouse, Ball *ball, Paddle *left_paddle,
     if (SDL_HasIntersection(&ball->rect, &left_paddle->rect)) {
         int rel = (left_paddle->rect.y + left_paddle->rect.h / 2) -
                   (ball->rect.y + ball->rect.h / 2);
-        ball->vy = -rel / PXLH * BALL_SPEED;
+        ball->vy = -rel / pixel_h * BALL_SPEED;
         ball->vx = -ball->vx;
         ball->rect.x = left_paddle->rect.x + left_paddle->rect.w;
     }
     if (SDL_HasIntersection(&ball->rect, &right_paddle->rect)) {
         int rel = (right_paddle->rect.y + right_paddle->rect.h / 2) -
                   (ball->rect.y + ball->rect.h / 2);
-        ball->vy = -rel / PXLH * BALL_SPEED;
+        ball->vy = -rel / pixel_h * BALL_SPEED;
         ball->vx = -ball->vx;
         ball->rect.x = right_paddle->rect.x - ball->rect.w;
     }
@@ -138,16 +146,16 @@ void draw(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color, Ball *ball,
     // Set the current render color.
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
     // Draw the scores
-    /* drawLabel(renderer, font, color, score, WIDTH / 2, 2 * PXLH); */
+    /* drawLabel(renderer, font, color, score, WIDTH / 2, 2 * pixel_h); */
     SDL_RenderFillRect(renderer, &left_paddle->rect);
     SDL_RenderFillRect(renderer, &right_paddle->rect);
     SDL_RenderFillRect(renderer, &ball->rect);
     // Render net
     SDL_Rect block;
-    block.w = PXLW / 4;
-    block.h = PXLH;
-    block.x = WIDTH / 2 - block.w / 2;
-    for (int i = 0; i < HEIGHT; i += 3 * PXLH) {
+    block.w = pixel_w / 4;
+    block.h = pixel_h;
+    block.x = display_w / 2 - block.w / 2;
+    for (int i = 0; i < display_h; i += 3 * pixel_h) {
         block.y = i;
         SDL_RenderFillRect(renderer, &block);
     }
@@ -169,12 +177,8 @@ void drawLabel(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color,
     SDL_DestroyTexture(texture);
 }
 
-int init_av(SDL_Renderer *renderer, SDL_Window *window, bool with_fullscreen) {
-    return 0;
-}
-
 int init_mouse(SDL_Window *window, Mouse *mouse) {
-    SDL_WarpMouseInWindow(window, WIDTH / 2, HEIGHT / 2);
+    SDL_WarpMouseInWindow(window, display_w / 2, display_h / 2);
     mouse->needs_warp = false;
     SDL_GetMouseState(&mouse->x, &mouse->y);
     return 0;
@@ -191,22 +195,22 @@ int main(int argc, char *argv[]) {
     color.b = 255;
     Mouse mouse;
     Paddle left_paddle;
-    left_paddle.rect.w = PXLW;
-    left_paddle.rect.h = PXLH * 5;
-    left_paddle.rect.x = 9 * PXLW;
-    left_paddle.rect.y = HEIGHT / 2 - left_paddle.rect.h / 2;
+    left_paddle.rect.w = pixel_w;
+    left_paddle.rect.h = pixel_h * 5;
+    left_paddle.rect.x = 9 * pixel_w;
+    left_paddle.rect.y = display_h / 2 - left_paddle.rect.h / 2;
     left_paddle.kb_vy = 0;
     Paddle right_paddle;
     right_paddle.rect.w = left_paddle.rect.w;
     right_paddle.rect.h = left_paddle.rect.h;
-    right_paddle.rect.x = WIDTH - left_paddle.rect.x - right_paddle.rect.w;
+    right_paddle.rect.x = display_w - left_paddle.rect.x - right_paddle.rect.w;
     right_paddle.rect.y = left_paddle.rect.y;
     right_paddle.kb_vy = 0;
     Ball ball;
-    ball.rect.w = PXLW;
-    ball.rect.h = PXLH;
-    ball.rect.x = WIDTH / 2 - ball.rect.w / 2;
-    ball.rect.y = HEIGHT / 2 - ball.rect.h / 2;
+    ball.rect.w = pixel_w;
+    ball.rect.h = pixel_h;
+    ball.rect.x = display_w / 2 - ball.rect.w / 2;
+    ball.rect.y = display_h / 2 - ball.rect.h / 2;
     ball.vx = -BALL_SPEED;
     ball.vy = rand() % 2 - 1;
     // time sync variables
@@ -217,15 +221,26 @@ int main(int argc, char *argv[]) {
     int fps = 0;
     bool running = false;
     // Init Audio and video. Bail out with an error if it fails.
-    int status = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    int status = SDL_Init(SDL_INIT_VIDEO);
     if (status < 0) {
         printf("Failed at SDL_Init()");
         exit(status);
     }
-    status = SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &window, &renderer);
+    status = SDL_CreateWindowAndRenderer(display_w, display_h, 0, &window, &renderer);
     if (WITH_FULLSCREEN) {
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        SDL_DisplayMode current;
+        SDL_GetCurrentDisplayMode(0, &current);
+        printf("Resolution: (%d, %d)\n", current.w, current.h);
+        printf("Pixel format: %d\n", current.format);
+        printf("Refresh rate: %d\n", current.refresh_rate);
     }
+    update_display_size(window);
+    SDL_DisplayMode current;
+    SDL_GetCurrentDisplayMode(0, &current);
+    printf("Resolution: (%d, %d)\n", current.w, current.h);
+    printf("Pixel format: %d\n", current.format);
+    printf("Refresh rate: %d\n", current.refresh_rate);
     if (status < 0) {
         printf("Failed at SDL_CreateWindowAndRenderer()\n");
         exit(status);
@@ -245,7 +260,8 @@ int main(int argc, char *argv[]) {
             frame_count = 0;
             printf("FPS: %d\n", fps);
         }
-        input(window, &mouse, &left_paddle, &right_paddle, &running);
+        update_display_size(window);
+        handle_events(window, &mouse, &left_paddle, &right_paddle, &running);
         update(window, &mouse, &ball, &left_paddle, &right_paddle);
         draw(renderer, font, color, &ball, &left_paddle, &right_paddle);
 
