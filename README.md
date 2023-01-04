@@ -1,12 +1,12 @@
-# Pong
+# Retro Tennis
 
 _Gilbert François Duivesteijn_
 
-
+This project is work in progress. Please come back later...
 
 ## Abstract
 
-_Pong is a table tennis–themed twitch arcade sports video game, featuring simple two-dimensional graphics, manufactured by Atari and originally released in 1972._ (Source: Wikipedia)
+_Retro Tennis, (also known as Pong) is a table tennis–themed twitch arcade sports video game, featuring simple two-dimensional graphics, manufactured by Atari and originally released in 1972._ (Source: Wikipedia)
 
 
 
