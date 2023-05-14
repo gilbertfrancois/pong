@@ -120,10 +120,6 @@ void update(SDL_Window *window, GameState *g) {
         Mix_PlayChannel(-1, g->snd_bounce, 0);
     }
     // Point scored by one of the players.
-    if (g->ball.rect.x == 7 || g->ball.rect.x == g->retro_disp_w - 7 - g->ball.rect.w) {
-        Mix_PlayChannel(-1, g->snd_bounce, 0);
-    }
-
     if (g->ball.rect.x <= 0) {
         g->right_score++;
         g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
