@@ -4,6 +4,7 @@
     "description": "Pong",
     "dependencies": [
         "sdl2",
-        "sdl2-ttf"
+        "sdl2-ttf",
+        "sdl2-mixer"
     ]
 }

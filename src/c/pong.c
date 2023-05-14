@@ -17,6 +17,7 @@
 #include "pong.h"
 #include "SDL2/SDL_render.h"
 #include "SDL2/SDL_video.h"
+#include <SDL_mixer.h>
 
 void handle_events(SDL_Window *window, GameState *g, bool *running) {
     SDL_Event event;
@@ -60,8 +61,10 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
     int x = 0;
     int y = 0;
     SDL_GetMouseState(&x, &y);
+    // Scale mouse movement to the render texture.
+    y = (y * g->retro_disp_h)/g->display_h;
     if (!g->mouse.needs_warp && g->left_paddle.kb_vy == 0) {
-        g->left_paddle.ms_vy = (y - g->mouse.y);
+        g->left_paddle.ms_vy = y - g->mouse.y;
     } else {
         g->left_paddle.ms_vy = 0;
     }
@@ -74,10 +77,7 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
 // Update display size in case the user has changed it.
 void update_display_size(SDL_Window *window, GameState *g) {
     SDL_GetWindowSize(window, &g->display_w, &g->display_h);
-    g->pixel_w = g->display_w / g->retro_disp_w;
-    g->pixel_h = g->display_h / g->retro_disp_h;
-    g->ball_speed = g->pixel_w;
-    g->paddle_speed = g->pixel_w * 2;
+    SDL_ShowCursor(SDL_DISABLE);
 }
 
 void update(SDL_Window *window, GameState *g) {
@@ -96,14 +96,14 @@ void update(SDL_Window *window, GameState *g) {
         g->right_paddle.rect.y -= g->ball_speed;
     }
     // Prevent the paddles from going off-screen
-    if (g->left_paddle.rect.y > (g->display_h - g->left_paddle.rect.h)) {
-        g->left_paddle.rect.y = (g->display_h - g->left_paddle.rect.h);
+    if (g->left_paddle.rect.y > (g->retro_disp_h - g->left_paddle.rect.h)) {
+        g->left_paddle.rect.y = (g->retro_disp_h - g->left_paddle.rect.h);
     }
     if (g->left_paddle.rect.y < 0) {
         g->left_paddle.rect.y = 0;
     }
-    if (g->right_paddle.rect.y > (g->display_h - g->right_paddle.rect.h)) {
-        g->right_paddle.rect.y = (g->display_h - g->right_paddle.rect.h);
+    if (g->right_paddle.rect.y > (g->retro_disp_h - g->right_paddle.rect.h)) {
+        g->right_paddle.rect.y = (g->retro_disp_h - g->right_paddle.rect.h);
     }
     if (g->right_paddle.rect.y < 0) {
         g->right_paddle.rect.y = 0;
@@ -112,27 +112,35 @@ void update(SDL_Window *window, GameState *g) {
     if (g->ball.rect.y <= 0) {
         g->ball.vy = -g->ball.vy;
         g->ball.rect.y = 0;
+        Mix_PlayChannel(-1, g->snd_bounce, 0);
     }
-    if (g->ball.rect.y >= (g->display_h - g->ball.rect.h)) {
+    if (g->ball.rect.y >= (g->retro_disp_h - g->ball.rect.h)) {
         g->ball.vy = -g->ball.vy;
-        g->ball.rect.y = g->display_h - g->ball.rect.h;
+        g->ball.rect.y = g->retro_disp_h - g->ball.rect.h;
+        Mix_PlayChannel(-1, g->snd_bounce, 0);
     }
     // Point scored by one of the players.
+    if (g->ball.rect.x == 7 || g->ball.rect.x == g->retro_disp_w - 7 - g->ball.rect.w) {
+        Mix_PlayChannel(-1, g->snd_bounce, 0);
+    }
+
     if (g->ball.rect.x <= 0) {
         g->right_score++;
-        g->ball.rect.x = g->display_w / 2 - g->ball.rect.w / 2;
+        g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
         g->ball.rect.y = g->right_paddle.rect.y - g->right_paddle.rect.h / 2 +
                          g->ball.rect.h / 2;
         g->ball.vy = ((rand() % 2) - 1) * g->ball_speed;
         g->ball.vx = -g->ball_speed;
+        Mix_PlayChannel(-1, g->snd_score, 0);
     }
-    if (g->ball.rect.x >= (g->display_w - g->ball.rect.w)) {
+    if (g->ball.rect.x >= (g->retro_disp_w - g->ball.rect.w)) {
         g->left_score++;
-        g->ball.rect.x = g->display_w / 2 - g->ball.rect.w / 2;
+        g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
         g->ball.rect.y = g->left_paddle.rect.y - g->left_paddle.rect.h / 2 +
                          g->ball.rect.h / 2;
         g->ball.vy = ((rand() % 2) - 1) * g->ball_speed;
         g->ball.vx = g->ball_speed;
+        Mix_PlayChannel(-1, g->snd_score, 0);
     }
     // Collision detection
     if (SDL_HasIntersection(&g->ball.rect, &g->left_paddle.rect)) {
@@ -141,6 +149,7 @@ void update(SDL_Window *window, GameState *g) {
         g->ball.vy = -rel / g->pixel_h * g->ball_speed;
         g->ball.vx = -g->ball.vx;
         g->ball.rect.x = g->left_paddle.rect.x + g->left_paddle.rect.w;
+        Mix_PlayChannel(-1, g->snd_pad, 0);
     }
     if (SDL_HasIntersection(&g->ball.rect, &g->right_paddle.rect)) {
         int rel = (g->right_paddle.rect.y + g->right_paddle.rect.h / 2) -
@@ -148,10 +157,14 @@ void update(SDL_Window *window, GameState *g) {
         g->ball.vy = -rel / g->pixel_h * g->ball_speed;
         g->ball.vx = -g->ball.vx;
         g->ball.rect.x = g->right_paddle.rect.x - g->ball.rect.w;
+        Mix_PlayChannel(-1, g->snd_pad, 0);
     }
 }
 
-void draw(SDL_Renderer *renderer, GameState *g) {
+void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g) {
+    // Set renderer to the offline texture.
+    SDL_SetRenderTarget(renderer, texture);
+    // Set color and clear the render context.
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);
     SDL_RenderClear(renderer);
     /* g->right_paddle.rect.y += 1; */
@@ -163,13 +176,17 @@ void draw(SDL_Renderer *renderer, GameState *g) {
     SDL_RenderFillRect(renderer, &g->ball.rect);
     // Render net
     SDL_Rect block;
-    block.w = g->pixel_w / 4;
+    // block.w = g->pixel_w / 4;
+    block.w = g->pixel_w; 
     block.h = g->pixel_h;
-    block.x = g->display_w / 2 - block.w / 2;
+    block.x = g->retro_disp_w / 2 - block.w / 2;
     for (int i = 0; i < g->display_h; i += 3 * g->pixel_h) {
         block.y = i;
         SDL_RenderFillRect(renderer, &block);
     }
+    // Set renderer to the screen and copy/scale the texture on screen.
+    SDL_SetRenderTarget(renderer, NULL);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
 }
 
@@ -194,8 +211,8 @@ void init_game_state(GameState *g) {
     g->fullscreen = true;
     g->display_w = 500;
     g->display_h = 400;
-    g->pixel_w = g->display_w / g->retro_disp_w;
-    g->pixel_h = g->display_h / g->retro_disp_h;
+    g->pixel_w = 1; //g->display_w / g->retro_disp_w;
+    g->pixel_h = 1; //g->display_h / g->retro_disp_h;
     g->ball_speed = g->pixel_w;
     g->paddle_speed = g->pixel_w * 2;
     g->font_size = 32;
@@ -205,18 +222,18 @@ void init_game_state(GameState *g) {
     g->left_paddle.rect.w = g->pixel_w;
     g->left_paddle.rect.h = g->pixel_h * 5;
     g->left_paddle.rect.x = 9 * g->pixel_w;
-    g->left_paddle.rect.y = g->display_h / 2 - g->left_paddle.rect.h / 2;
+    g->left_paddle.rect.y = g->retro_disp_h / 2 - g->left_paddle.rect.h / 2;
     g->left_paddle.kb_vy = 0;
     g->right_paddle.rect.w = g->left_paddle.rect.w;
     g->right_paddle.rect.h = g->left_paddle.rect.h;
     g->right_paddle.rect.x =
-        g->display_w - g->left_paddle.rect.x - g->right_paddle.rect.w;
+        g->retro_disp_w - g->left_paddle.rect.x - g->right_paddle.rect.w;
     g->right_paddle.rect.y = g->left_paddle.rect.y;
     g->right_paddle.kb_vy = 0;
     g->ball.rect.w = g->pixel_w;
     g->ball.rect.h = g->pixel_h;
-    g->ball.rect.x = g->display_w / 2 - g->ball.rect.w / 2;
-    g->ball.rect.y = g->display_h / 2 - g->ball.rect.h / 2;
+    g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
+    g->ball.rect.y = g->retro_disp_h / 2 - g->ball.rect.h / 2;
     g->ball.vx = -g->ball_speed;
     g->ball.vy = rand() % 2 - 1;
 }
@@ -232,6 +249,7 @@ int main(int argc, char *argv[]) {
     // Init variables
     SDL_Renderer *renderer;
     SDL_Window *window;
+    SDL_Texture *texture;
     GameState g;
     init_game_state(&g);
 
@@ -263,6 +281,18 @@ int main(int argc, char *argv[]) {
         printf("Failed at SDL_CreateWindowAndRenderer()\n");
         exit(status);
     }
+    // Init render canvas.
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, g.retro_disp_w, g.retro_disp_h);
+    // Init sound
+    status = Mix_Init(0);
+    if (status < 0) {
+        printf("Failed at Mix_Init()");
+        exit(status);
+    }
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 1024);
+    g.snd_bounce = Mix_LoadWAV("bounce.wav");
+    g.snd_pad = Mix_LoadWAV("pad.wav");
+    g.snd_score = Mix_LoadWAV("score.wav");
 
     // Init font
     TTF_Init();
@@ -282,7 +312,7 @@ int main(int argc, char *argv[]) {
         update_display_size(window, &g);
         handle_events(window, &g, &running);
         update(window, &g);
-        draw(renderer, &g);
+        draw(renderer, texture, &g);
 
         frame_count++;
         timer_fps = SDL_GetTicks() - time;
@@ -293,6 +323,7 @@ int main(int argc, char *argv[]) {
     // Exit gracefully.
     TTF_CloseFont(g.font);
     SDL_DestroyRenderer(renderer);
+    SDL_DestroyTexture(texture);
     SDL_DestroyWindow(window);
     SDL_Quit();
 

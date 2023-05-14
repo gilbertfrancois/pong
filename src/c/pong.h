@@ -19,6 +19,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,6 +72,9 @@ typedef struct {
     char *score;
     int left_score;
     int right_score;
+    Mix_Chunk *snd_bounce;
+    Mix_Chunk *snd_score;
+    Mix_Chunk *snd_pad;
 } GameState;
 
 void init_game_state(GameState *g);
@@ -79,7 +83,7 @@ int init_mouse(SDL_Window *window, GameState *g);
 void handle_events(SDL_Window *window, GameState *g, bool *running);
 void update_display_size(SDL_Window *window, GameState *g);
 void update(SDL_Window *window, GameState *g);
-void draw(SDL_Renderer *renderer, GameState *g);
+void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g);
 /* void drawLabel(SDL_Renderer *renderer, GameState *g, char *text, int x, int y); */
 
 int main(int argc, char *argv[]);
