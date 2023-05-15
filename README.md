@@ -9,27 +9,29 @@ This project is work in progress. Please come back later...
 _Retro Tennis, (also known as Pong) is a table tennis–themed twitch arcade sports video game, featuring simple two-dimensional graphics, manufactured by Atari and originally released in 1972._ (Source: Wikipedia)
 
 
+## Install on macOS and Linux
 
-## Install
+Compiling the project should be straight forward, thanks to vcpkg. After compiling and installing, the program `pong` is located in the `<project_folder>/dist`.
 
 ```sh
-mkdir -p build_external
-git clone https://github.com/libsdl-org/SDL.git --branch release-2.26.1 --single-branch --depth 1 --recurse-submodules
-cd SDL
-./configure --enable-shared=no --enable-static=yes --prefix=`pwd`/../../ext/
+git clone https://github.com/gilbertfrancois/retro-tennis.git
+
+cd retro-tennis
+
+# Important!
+git submodule update --init --recursive
+
+# Build the project and its dependencies
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
+make install
 ```
 
+## Running
 
-
-
-
-## Motivation for making this game
-
-- Improve skills in GDB / LLDB debugging
-
-- Improve skills in multi-platform development
-
-- Revive the 70s!
-
-  
-
+```sh
+cd dist
+./pong
+```
