@@ -51,6 +51,7 @@ typedef struct {
 } Ball;
 
 typedef struct {
+    int target_fps;
     int retro_disp_w; // 100
     int retro_disp_h; //  80
     bool fullscreen;
@@ -62,6 +63,8 @@ typedef struct {
     int font_size; // 64
     int ball_speed;
     int paddle_speed;
+    bool left_player_serving;
+    bool right_player_serving;
     TTF_Font *font;
     SDL_Color color;
     Mouse mouse;
@@ -85,6 +88,7 @@ void update_display_size(SDL_Window *window, GameState *g);
 void update(SDL_Window *window, GameState *g);
 void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g);
 /* void drawLabel(SDL_Renderer *renderer, GameState *g, char *text, int x, int y); */
+void launch_ball(int player, GameState *g);
 
 int main(int argc, char *argv[]);
 

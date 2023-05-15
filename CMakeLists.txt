@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+set(CMAKE_TOOLCHAIN_FILE
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    CACHE STRING "Vcpkg toolchain file")
 
 project(pong)
 
@@ -10,11 +12,17 @@ find_package(SDL2_mixer CONFIG REQUIRED)
 
 add_executable(pong src/c/pong.c)
 
-target_link_libraries(pong PRIVATE
-    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> 
+target_link_libraries(
+  pong
+  PRIVATE
+    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
 )
 
-install(TARGETS pong DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+install( TARGETS pong DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+file (COPY ${CMAKE_SOURCE_DIR}/resources/sound/bounce.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+file (COPY ${CMAKE_SOURCE_DIR}/resources/sound/pad.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+file (COPY ${CMAKE_SOURCE_DIR}/resources/sound/score.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+
