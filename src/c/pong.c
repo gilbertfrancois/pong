@@ -22,9 +22,34 @@
 
 void handle_events(SDL_Window *window, GameState *g, bool *running) {
     SDL_Event event;
-    const Uint8 *keystates = SDL_GetKeyboardState(NULL);
     // Handle keyboard events
     while (SDL_PollEvent(&event)) {
+        const unsigned char *keystates = SDL_GetKeyboardState(NULL);
+        int x = 0;
+        int y = 0;
+        const unsigned int button_state = SDL_GetMouseState(&x, &y);
+        if (event.type == SDL_KEYDOWN) {
+            if (keystates[SDL_SCANCODE_UP] || keystates[SDL_SCANCODE_W]) {
+                g->left_paddle.kb_vy = -g->paddle_speed;
+                g->mouse.needs_warp = true;
+            }
+            if (keystates[SDL_SCANCODE_DOWN] || keystates[SDL_SCANCODE_S]) {
+                g->left_paddle.kb_vy = g->paddle_speed;
+                g->mouse.needs_warp = true;
+            }
+            if (keystates[SDL_SCANCODE_U]) {
+                g->right_paddle.kb_vy = -g->paddle_speed;
+            }
+            if (keystates[SDL_SCANCODE_J]) {
+                g->right_paddle.kb_vy = g->paddle_speed;
+            }
+            if (keystates[SDL_SCANCODE_X] && g->left_player_serving) {
+                launch_ball(0, g);
+            }
+            if (keystates[SDL_SCANCODE_M] && g->right_player_serving) {
+                launch_ball(1, g);
+            }
+        }
         if (event.type == SDL_KEYUP) {
             if (!keystates[SDL_SCANCODE_UP] && g->left_paddle.kb_vy < 0) {
                 g->left_paddle.kb_vy = 0;
@@ -34,40 +59,37 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
                 g->left_paddle.kb_vy = 0;
                 g->mouse.needs_warp = true;
             }
-            if (g->left_player_serving) {
-                if (keystates[SDL_SCANCODE_SPACE]) {
-                    launch_ball(0, g);
-                }
-            }
-        }
-        if (event.type == SDL_KEYDOWN) {
-            if (keystates[SDL_SCANCODE_UP]) {
-                g->left_paddle.kb_vy = -g->paddle_speed;
-                g->mouse.needs_warp = true;
-            }
-            if (keystates[SDL_SCANCODE_DOWN]) {
-                g->left_paddle.kb_vy = g->paddle_speed;
-                g->mouse.needs_warp = true;
-            }
-        }
 
+            if (!keystates[SDL_SCANCODE_U] && g->right_paddle.kb_vy < 0) {
+                g->right_paddle.kb_vy = 0;
+            }
+            if (!keystates[SDL_SCANCODE_J] && g->right_paddle.kb_vy > 0) {
+                g->right_paddle.kb_vy = 0;
+            }
+        }
         if (event.type == SDL_QUIT)
             *running = false;
         if (keystates[SDL_SCANCODE_ESCAPE])
             *running = false;
         if (keystates[SDL_SCANCODE_Q])
             *running = false;
+        // -------------------------------------------------------------------
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            if (button_state == SDL_BUTTON_LEFT && g->left_player_serving) {
+                launch_ball(0, g);
+            }
+        }
     }
     // Allow mouse and keyboard input at the same time. Keep the mouse position
     // in sync.
+    int x = 0;
+    int y = 0;
+    const unsigned int button_state = SDL_GetMouseState(&x, &y);
     if (g->mouse.needs_warp) {
         SDL_WarpMouseInWindow(window, g->display_w / 2,
                               g->left_paddle.rect.y +
                                   g->left_paddle.rect.h / 2);
     }
-    int x = 0;
-    int y = 0;
-    unsigned int button_state = SDL_GetMouseState(&x, &y);
     // Scale mouse movement to the render texture.
     y = (y * g->retro_disp_h) / g->display_h;
     if (!g->mouse.needs_warp && g->left_paddle.kb_vy == 0) {
@@ -79,9 +101,7 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
         g->mouse.needs_warp = false;
     }
     g->mouse.y = y;
-    if (g->left_player_serving && button_state == SDL_BUTTON_LEFT) {
-        launch_ball(0, g);
-    }
+    // -------------------------------------------------------------------
 }
 
 // Update display size in case the user has changed it.
@@ -132,28 +152,27 @@ void update(SDL_Window *window, GameState *g) {
     // Point scored by one of the players.
     if (g->ball.rect.x <= 0) {
         g->right_score++;
-        g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
-        g->ball.rect.y = g->right_paddle.rect.y - g->right_paddle.rect.h / 2 +
-                         g->ball.rect.h / 2;
         g->ball.vx = 0;
         g->ball.vy = 0;
-        g->right_player_serving = true;
-        // g->ball.vy = ((rand() % 2) - 1) * g->ball_speed;
-        // g->ball.vx = -g->ball_speed;
+        g->left_player_serving = true;
         Mix_PlayChannel(-1, g->snd_score, 0);
     }
     if (g->ball.rect.x >= (g->retro_disp_w - g->ball.rect.w)) {
         g->left_score++;
-        g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
-        g->ball.rect.y = g->left_paddle.rect.y - g->left_paddle.rect.h / 2 +
-                         g->ball.rect.h / 2;
-        // g->ball.vy = ((rand() % 2) - 1) * g->ball_speed;
-        // g->ball.vx = g->ball_speed;
         g->ball.vx = 0;
         g->ball.vy = 0;
-        g->left_player_serving = false;
+        g->right_player_serving = true;
         Mix_PlayChannel(-1, g->snd_score, 0);
     }
+    if (g->left_player_serving) {
+        g->ball.rect.x = g->left_paddle.rect.x + g->left_paddle.rect.w;
+        g->ball.rect.y = g->left_paddle.rect.y + g->right_paddle.rect.h / 2 + g->ball.rect.h / 2;
+    }
+    if (g->right_player_serving) {
+        g->ball.rect.x = g->right_paddle.rect.x - g->ball.rect.w;
+        g->ball.rect.y = g->right_paddle.rect.y + g->right_paddle.rect.h / 2 + g->ball.rect.h / 2;
+    }
+
     // Collision detection
     if (SDL_HasIntersection(&g->ball.rect, &g->left_paddle.rect)) {
         int rel = (g->left_paddle.rect.y + g->left_paddle.rect.h / 2) -
@@ -253,13 +272,12 @@ void init_game_state(GameState *g) {
 
 int init_mouse(SDL_Window *window, GameState *g) {
     SDL_WarpMouseInWindow(window, g->display_w / 2, g->display_h / 2);
-    g->mouse.needs_warp = false;
+    g->mouse.needs_warp = true;
     SDL_GetMouseState(&g->mouse.x, &g->mouse.y);
     return 0;
 }
 
 void launch_ball(int player, GameState *g) {
-
     if (player == 0) {
         g->ball.vy = ((rand() % 2) - 1) * g->ball_speed;
         g->ball.vx = g->ball_speed;
@@ -269,13 +287,15 @@ void launch_ball(int player, GameState *g) {
     } else {
         printf("Illegal state\n");
     }
+    g->left_player_serving = false;
+    g->right_player_serving = false;
 }
 
 int main(int argc, char *argv[]) {
     // Init variables
-    SDL_Renderer *renderer;
-    SDL_Window *window;
-    SDL_Texture *texture;
+    SDL_Renderer *renderer = NULL;
+    SDL_Window *window = NULL;
+    SDL_Texture *texture = NULL;
     GameState g;
     init_game_state(&g);
 
@@ -293,26 +313,18 @@ int main(int argc, char *argv[]) {
         printf("Failed at SDL_Init()");
         exit(status);
     }
-    status = SDL_CreateWindowAndRenderer(g.display_w, g.display_h,
-                                         SDL_RENDERER_PRESENTVSYNC, &window,
-                                         &renderer);
-    if (g.fullscreen) {
+    window =
+        SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                         g.display_w, g.display_h, SDL_WINDOW_SHOWN);
+    if (g.fullscreen)
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-    }
-    update_display_size(window, &g);
-    SDL_DisplayMode current;
-    SDL_GetCurrentDisplayMode(0, &current);
-    printf("Resolution: (%d, %d)\n", current.w, current.h);
-    printf("Pixel format: %d\n", current.format);
-    printf("Refresh rate: %d\n", current.refresh_rate);
-    if (status < 0) {
-        printf("Failed at SDL_CreateWindowAndRenderer()\n");
-        exit(status);
-    }
-    // Init render canvas.
+    renderer = SDL_CreateRenderer(
+        window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                                 SDL_TEXTUREACCESS_TARGET, g.retro_disp_w,
                                 g.retro_disp_h);
+    update_display_size(window, &g);
+    // Init render canvas.
     // Init sound
     status = Mix_Init(0);
     if (status < 0) {
@@ -323,12 +335,29 @@ int main(int argc, char *argv[]) {
     g.snd_bounce = Mix_LoadWAV("bounce.wav");
     g.snd_pad = Mix_LoadWAV("pad.wav");
     g.snd_score = Mix_LoadWAV("score.wav");
-
     // Init font
     TTF_Init();
     g.font = TTF_OpenFont("atari.ttf", g.font_size);
     // Init mouse
     init_mouse(window, &g);
+    // Info to console
+    SDL_DisplayMode current;
+    SDL_GetCurrentDisplayMode(0, &current);
+    printf("Resolution: (%d, %d)\n", current.w, current.h);
+    // printf("Pixel format: %u\n", current.format);
+    printf("Refresh rate: %d\n", current.refresh_rate);
+    SDL_RendererInfo info;
+    SDL_GetRendererInfo(renderer, &info);
+    printf("VSync enabled: %u\n", ((info.flags & SDL_RENDERER_PRESENTVSYNC) ==
+                                   SDL_RENDERER_PRESENTVSYNC));
+    printf("Renderer is using software fallback: %u\n",
+           ((info.flags & SDL_RENDERER_SOFTWARE) == SDL_RENDERER_SOFTWARE));
+    printf(
+        "Renderer is hardware accelerated: %d\n",
+        ((info.flags & SDL_RENDERER_ACCELERATED) == SDL_RENDERER_ACCELERATED));
+    printf("Renderer supports rendering to texture: %d\n",
+           ((info.flags & SDL_RENDERER_TARGETTEXTURE) ==
+            SDL_RENDERER_TARGETTEXTURE));
     // Begin event loop
     running = true;
     while (running) {
@@ -341,8 +370,8 @@ int main(int argc, char *argv[]) {
         chrono_frame = toc - tic;
         unsigned int sleep_time =
             (unsigned int)(millis_per_frame - chrono_frame);
-        if (sleep_time > 0 && sleep_time < 1000)
-            SDL_Delay(sleep_time);
+        // if (sleep_time > 0 && sleep_time < 1000)
+        //     SDL_Delay(sleep_time);
     }
     // Exit gracefully.
     TTF_CloseFont(g.font);
