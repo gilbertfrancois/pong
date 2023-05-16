@@ -107,7 +107,7 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
 // Update display size in case the user has changed it.
 void update_display_size(SDL_Window *window, GameState *g) {
     SDL_GetWindowSize(window, &g->display_w, &g->display_h);
-    SDL_ShowCursor(SDL_DISABLE);
+    // SDL_ShowCursor(SDL_DISABLE);
 }
 
 void update(SDL_Window *window, GameState *g) {
@@ -272,8 +272,8 @@ void init_game_state(GameState *g) {
 
 int init_mouse(SDL_Window *window, GameState *g) {
     SDL_WarpMouseInWindow(window, g->display_w / 2, g->display_h / 2);
-    g->mouse.needs_warp = true;
     SDL_GetMouseState(&g->mouse.x, &g->mouse.y);
+    g->mouse.y = (g->mouse.y * g->retro_disp_h) / g->display_h;
     return 0;
 }
 
