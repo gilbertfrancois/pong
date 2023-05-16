@@ -18,8 +18,8 @@
 #define PONG_H_FILE
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,15 +51,23 @@ typedef struct {
 } Ball;
 
 typedef struct {
+    bool key_up;
+    bool key_down;
+    int timer_key;
+    int timer_button;
+    int timer_service;
+} Agent;
+
+typedef struct {
     int target_fps;
     int retro_disp_w; // 100
     int retro_disp_h; //  80
+    int native_disp_w;
+    int native_disp_h;
     bool fullscreen;
-    int display_w;
-    int display_h;
     int offset;
-    int pixel_w;   // display_w / retro_disp_w;
-    int pixel_h;   // display_h / retro_disp_h;
+    int pixel_w;
+    int pixel_h;
     int font_size; // 64
     int ball_speed;
     int paddle_speed;
@@ -81,14 +89,21 @@ typedef struct {
 } GameState;
 
 void init_game_state(GameState *g);
-int init_mouse(SDL_Window *window, GameState *g);
-
+void retro_to_native_disp(GameState *g, int *x, int *y);
+void native_to_retro_disp(GameState *g, int *x, int *y);
 void handle_events(SDL_Window *window, GameState *g, bool *running);
 void update_display_size(SDL_Window *window, GameState *g);
-void update(SDL_Window *window, GameState *g);
+void update(GameState *g);
+void update_paddle_position(GameState *g);
+void update_ball_position(GameState *g);
+void update_scores(GameState *g);
+void update_collision_detection(GameState *g);
+void update_right_agent(GameState *g);
 void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g);
-/* void drawLabel(SDL_Renderer *renderer, GameState *g, char *text, int x, int y); */
+/* void drawLabel(SDL_Renderer *renderer, GameState *g, char *text, int x, int
+ * y); */
 void launch_ball(int player, GameState *g);
+void warp_mouse(SDL_Window *window, GameState *g);
 
 int main(int argc, char *argv[]);
 
