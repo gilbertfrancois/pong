@@ -95,6 +95,157 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
     // -------------------------------------------------------------------
 }
 
+void draw_segment(SDL_Renderer *renderer, GameState *g, int x0, int y0, int x,
+                  int y, int w, int h) {
+    SDL_Rect segment;
+    segment.x = x0 + x * g->pixel_w;
+    segment.y = y0 + y * g->pixel_h;
+    segment.w = w * g->pixel_w;
+    segment.h = h * g->pixel_h;
+    SDL_RenderFillRect(renderer, &segment);
+}
+
+void draw_segment_A(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment(renderer, g, x0, y0, 0, 0, 4, 1);
+}
+
+void draw_segment_B(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment(renderer, g, x0, y0, 3, 0, 1, 3);
+}
+
+void draw_segment_C(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment(renderer, g, x0, y0, 3, 3, 1, 5);
+}
+
+void draw_segment_D(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment(renderer, g, x0, y0, 0, 7, 4, 1);
+}
+
+void draw_segment_E(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment(renderer, g, x0, y0, 0, 3, 1, 5);
+}
+
+void draw_segment_F(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment(renderer, g, x0, y0, 0, 0, 1, 3);
+}
+
+void draw_segment_G(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment(renderer, g, x0, y0, 0, 3, 4, 1);
+}
+
+void draw_0(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_A(renderer, g, x0, y0);
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+    draw_segment_D(renderer, g, x0, y0);
+    draw_segment_E(renderer, g, x0, y0);
+    draw_segment_F(renderer, g, x0, y0);
+}
+
+void draw_1(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+}
+
+void draw_2(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_A(renderer, g, x0, y0);
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_D(renderer, g, x0, y0);
+    draw_segment_E(renderer, g, x0, y0);
+    draw_segment_G(renderer, g, x0, y0);
+}
+
+void draw_3(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_A(renderer, g, x0, y0);
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+    draw_segment_D(renderer, g, x0, y0);
+    draw_segment_G(renderer, g, x0, y0);
+}
+
+void draw_4(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+    draw_segment_F(renderer, g, x0, y0);
+    draw_segment_G(renderer, g, x0, y0);
+}
+
+void draw_5(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_A(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+    draw_segment_D(renderer, g, x0, y0);
+    draw_segment_F(renderer, g, x0, y0);
+    draw_segment_G(renderer, g, x0, y0);
+}
+
+void draw_6(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_C(renderer, g, x0, y0);
+    draw_segment_D(renderer, g, x0, y0);
+    draw_segment_E(renderer, g, x0, y0);
+    draw_segment_F(renderer, g, x0, y0);
+    draw_segment_G(renderer, g, x0, y0);
+}
+
+void draw_7(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_A(renderer, g, x0, y0);
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+}
+
+void draw_8(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_A(renderer, g, x0, y0);
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+    draw_segment_D(renderer, g, x0, y0);
+    draw_segment_E(renderer, g, x0, y0);
+    draw_segment_F(renderer, g, x0, y0);
+    draw_segment_G(renderer, g, x0, y0);
+}
+
+void draw_9(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
+    draw_segment_A(renderer, g, x0, y0);
+    draw_segment_B(renderer, g, x0, y0);
+    draw_segment_C(renderer, g, x0, y0);
+    draw_segment_F(renderer, g, x0, y0);
+    draw_segment_G(renderer, g, x0, y0);
+}
+
+void draw_digit(SDL_Renderer *renderer, GameState *g, int digits, int x0,
+                int y0) {
+    switch (digits) {
+    case 0:
+        draw_0(renderer, g, x0, y0);
+        break;
+    case 1:
+        draw_1(renderer, g, x0, y0);
+        break;
+    case 2:
+        draw_2(renderer, g, x0, y0);
+        break;
+    case 3:
+        draw_3(renderer, g, x0, y0);
+        break;
+    case 4:
+        draw_4(renderer, g, x0, y0);
+        break;
+    case 5:
+        draw_5(renderer, g, x0, y0);
+        break;
+    case 6:
+        draw_6(renderer, g, x0, y0);
+        break;
+    case 7:
+        draw_7(renderer, g, x0, y0);
+        break;
+    case 8:
+        draw_8(renderer, g, x0, y0);
+        break;
+    case 9:
+        draw_9(renderer, g, x0, y0);
+        break;
+    }
+}
+
 void retro_to_native_disp(GameState *g, int *x, int *y) {
     *x = (*x * g->native_disp_w) / g->retro_disp_w;
     *y = (*y * g->native_disp_h) / g->retro_disp_h;
@@ -122,12 +273,25 @@ void update_display_size(SDL_Window *window, GameState *g) {
 }
 
 void update_agent(GameState *g, Paddle *paddle) {
-    // Robot player
-    int jitter = rand() % 3;
+    // method 1:
     int distance = (paddle->rect.y + paddle->rect.h / 2) -
                    (g->ball.rect.y + g->ball.rect.h / 2);
-    int accel = 3 + jitter;
-    paddle->rect.y -= distance / accel;
+    if (distance < 0) {
+        paddle->kb_vy = g->ball_speed;
+        paddle->ms_vy = 0;
+    }
+
+    else if (distance > 0) {
+        paddle->kb_vy = -g->ball_speed;
+        paddle->ms_vy = 0;
+    } else {
+        paddle->kb_vy = 0;
+        paddle->ms_vy = 0;
+    }
+    // // Robot player
+    // int jitter = rand() % 3;
+    // int accel = 3 + jitter;
+    // paddle->rect.y -= distance / accel;
 }
 
 void update_left_agent(GameState *g) { update_agent(g, &(g->left_paddle)); }
@@ -201,10 +365,17 @@ void update_scores(GameState *g) {
 void update_collision_detection(GameState *g) {
     // Collision detection
     if (SDL_HasIntersection(&g->ball.rect, &g->left_paddle.rect)) {
+        int mid_x = 0;
+        int mid_y = 0;
         int rel = (g->left_paddle.rect.y + g->left_paddle.rect.h / 2) -
                   (g->ball.rect.y + g->ball.rect.h / 2);
-        g->ball.vy = -rel / g->pixel_h * g->ball_speed;
-        g->ball.vx = -g->ball.vx;
+        if (rel == 0) {
+            mid_x = rand() % 2; 
+            mid_y = rand() % 3 - 1;
+        }
+
+        g->ball.vy = (-rel / g->pixel_h + mid_y )* g->ball_speed;
+        g->ball.vx = (-1 + mid_x ) * g->ball.vx;
         g->ball.rect.x = g->left_paddle.rect.x + g->left_paddle.rect.w;
         Mix_PlayChannel(-1, g->snd_pad, 0);
     }
@@ -221,7 +392,7 @@ void update_collision_detection(GameState *g) {
 void update(GameState *g) {
     update_ball_position(g);
     update_right_agent(g);
-    update_left_agent(g);
+    // update_left_agent(g);
     update_paddle_position(g);
     update_scores(g);
     update_collision_detection(g);
@@ -250,39 +421,26 @@ void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g) {
         block.y = i;
         SDL_RenderFillRect(renderer, &block);
     }
+    // Draw scores
+    draw_digit(renderer, g, g->left_score % 10, g->left_score_x0, g->left_score_y0);
+    draw_digit(renderer, g, g->right_score % 10, g->right_score_x0, g->right_score_y0);
     // Set renderer to the screen and copy/scale the texture on screen.
     SDL_SetRenderTarget(renderer, NULL);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
 }
 
-/* void drawLabel(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color, */
-/*                char *text, int x, int y) { */
-/*     SDL_Surface *surface; */
-/*     SDL_Texture *texture; */
-/*     surface = TTF_RenderText_Solid(font, text, color); */
-/*     texture = SDL_CreateTextureFromSurface(renderer, surface); */
-/*     score_board.w = surface->w; */
-/*     score_board.h = surface->h; */
-/*     score_board.x = x - surface->w / 2; */
-/*     score_board.y = y; */
-/*     SDL_FreeSurface(surface); */
-/*     SDL_RenderCopy(renderer, texture, NULL, &score_board); */
-/*     SDL_DestroyTexture(texture); */
-/* } */
-
 void init_game_state(GameState *g) {
     g->target_fps = 60;
     g->retro_disp_w = 100;
     g->retro_disp_h = 80;
-    g->fullscreen = false;
+    g->fullscreen = true;
     g->native_disp_w = 500;
     g->native_disp_h = 400;
     g->pixel_w = 1;
     g->pixel_h = 1;
     g->ball_speed = g->pixel_w * 60 / g->target_fps;
     g->paddle_speed = g->ball_speed * 2;
-    g->font_size = 32;
     g->color.r = 255;
     g->color.g = 255;
     g->color.b = 255;
@@ -291,12 +449,21 @@ void init_game_state(GameState *g) {
     g->left_paddle.rect.x = 9 * g->pixel_w;
     g->left_paddle.rect.y = g->retro_disp_h / 2 - g->left_paddle.rect.h / 2;
     g->left_paddle.kb_vy = 0;
+    g->left_paddle.ms_vy = 0;
     g->right_paddle.rect.w = g->left_paddle.rect.w;
     g->right_paddle.rect.h = g->left_paddle.rect.h;
     g->right_paddle.rect.x =
         g->retro_disp_w - g->left_paddle.rect.x - g->right_paddle.rect.w;
     g->right_paddle.rect.y = g->left_paddle.rect.y;
     g->right_paddle.kb_vy = 0;
+    g->right_paddle.ms_vy = 0;
+    g->left_score = 0;
+    g->left_score_x0 = g->left_paddle.rect.x + 3*g->pixel_w + 8+g->pixel_w;
+    g->left_score_y0 = 2*g->pixel_h;
+    g->right_score = 0;
+    g->right_score_x0 = g->right_paddle.rect.x - 5*g->pixel_w;
+    g->right_score_y0 = 2*g->pixel_h;
+
     g->ball.rect.w = g->pixel_w;
     g->ball.rect.h = g->pixel_h;
     g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
@@ -304,14 +471,6 @@ void init_game_state(GameState *g) {
     g->ball.vx = -g->ball_speed;
     g->ball.vy = rand() % 2 - 1;
 }
-
-// int init_mouse(SDL_Window *window, GameState *g) {
-// warp_mouse(window, g);
-// SDL_WarpMouseInWindow(window, g->display_w / 2, g->display_h / 2);
-// SDL_GetMouseState(&g->mouse.x, &g->mouse.y);
-// g->mouse.y = (g->mouse.y * g->retro_disp_h) / g->display_h;
-// return 0;
-// }
 
 void launch_ball(int player, GameState *g) {
     if (player == 0) {
@@ -371,9 +530,6 @@ int main(int argc, char *argv[]) {
     g.snd_bounce = Mix_LoadWAV("bounce.wav");
     g.snd_pad = Mix_LoadWAV("pad.wav");
     g.snd_score = Mix_LoadWAV("score.wav");
-    // Init font
-    TTF_Init();
-    g.font = TTF_OpenFont("atari.ttf", g.font_size);
     // Init mouse
     warp_mouse(window, &g);
     // Info to console
@@ -410,7 +566,6 @@ int main(int argc, char *argv[]) {
         //     SDL_Delay(sleep_time);
     }
     // Exit gracefully.
-    TTF_CloseFont(g.font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyTexture(texture);
     SDL_DestroyWindow(window);
