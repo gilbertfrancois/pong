@@ -19,6 +19,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL_rect.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,13 +58,14 @@ typedef struct {
 } Agent;
 
 typedef struct {
+    bool vsync;
+    unsigned long frame_count;
     int target_fps;
     int retro_disp_w; // 100
     int retro_disp_h; //  80
     int native_disp_w;
     int native_disp_h;
     bool fullscreen;
-    int offset;
     int pixel_w;
     int pixel_h;
     int ball_speed;
@@ -71,6 +73,7 @@ typedef struct {
     bool left_player_serving;
     bool right_player_serving;
     unsigned long serving_timer;
+    unsigned long serving_duration;
     SDL_Color color;
     Mouse mouse;
     Paddle left_paddle;
@@ -80,10 +83,8 @@ typedef struct {
     char *score;
     int left_score;
     int right_score;
-    int left_score_x0;
-    int left_score_y0;
-    int right_score_x0;
-    int right_score_y0;
+    SDL_Point left_score_pos;
+    SDL_Point right_score_pos;
     Mix_Chunk *snd_bounce;
     Mix_Chunk *snd_score;
     Mix_Chunk *snd_pad;
@@ -95,10 +96,10 @@ void native_to_retro_disp(GameState *g, int *x, int *y);
 void handle_events(SDL_Window *window, GameState *g, bool *running);
 void update_display_size(SDL_Window *window, GameState *g);
 void update(GameState *g);
-void update_paddle_position(GameState *g);
+void update_paddle(GameState *g, Paddle *paddle);
 void update_ball_position(GameState *g);
 void update_scores(GameState *g);
-void update_collision_detection(GameState *g);
+void update_collision_detections(GameState *g);
 void update_right_agent(GameState *g);
 void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g);
 void draw_segment_A(SDL_Renderer *renderer, GameState *g, int x0, int y0);
