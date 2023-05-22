@@ -14,6 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "pong.h"
+#include <limits.h>
 #include <stdint.h>
 
 void handle_events(SDL_Window *window, GameState *g, bool *running) {
@@ -521,7 +522,11 @@ void init_game_state(GameState *g) {
     g->target_fps = 60;
     g->retro_disp_w = 100;
     g->retro_disp_h = 80;
+#ifdef __EMSCRIPTEN__
+    g->fullscreen = false;
+#else
     g->fullscreen = true;
+#endif
     g->native_disp_w = 500;
     g->native_disp_h = 400;
     g->pixel_w = 1;
@@ -560,7 +565,7 @@ void init_game_state(GameState *g) {
     int direction = (rand() % 2 == 0) ? 1 : -1; 
     g->ball.vx = direction * g->ball_speed;
     g->ball.vy = rand() % 3 - 1;
-    g->serving_timer = INT64_MAX;
+    g->serving_timer = ULONG_MAX;
     g->serving_duration = 2000;
     g->left_player_serving = false;
     g->right_player_serving = false;
@@ -578,7 +583,7 @@ void launch_ball(int player, GameState *g) {
     }
     g->left_player_serving = false;
     g->right_player_serving = false;
-    g->serving_timer = INT64_MAX;
+    g->serving_timer = ULONG_MAX;
 }
 
 int main(int argc, char *argv[]) {
@@ -611,10 +616,12 @@ int main(int argc, char *argv[]) {
     SDL_DisplayMode display_mode;
     SDL_GetCurrentDisplayMode(0, &display_mode);
     int render_flags = SDL_RENDERER_ACCELERATED;
+#ifndef __EMSCRIPTEN__
     if (display_mode.refresh_rate == g.target_fps) {
         render_flags |= SDL_RENDERER_PRESENTVSYNC;
         g.vsync = true;
     }
+#endif
     renderer = SDL_CreateRenderer(window, -1, render_flags);
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                                 SDL_TEXTUREACCESS_TARGET, g.retro_disp_w,
