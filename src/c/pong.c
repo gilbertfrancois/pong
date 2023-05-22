@@ -17,7 +17,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-void handle_events(SDL_Window *window, GameState *g, bool *running) {
+void handle_events(GameState *g) {
     SDL_Event event;
     // Handle keyboard events
     while (SDL_PollEvent(&event)) {
@@ -51,7 +51,7 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
                 g->fullscreen = !g->fullscreen;
                 if (g->fullscreen)
                     flags = SDL_WINDOW_FULLSCREEN;
-                SDL_SetWindowFullscreen(window, flags);
+                SDL_SetWindowFullscreen(g->window, flags);
             }
         }
         if (event.type == SDL_KEYUP) {
@@ -72,11 +72,11 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
             }
         }
         if (event.type == SDL_QUIT)
-            *running = false;
+            g->running = false;
         if (keystates[SDL_SCANCODE_ESCAPE])
-            *running = false;
+            g->running = false;
         if (keystates[SDL_SCANCODE_Q])
-            *running = false;
+            g->running = false;
         // -------------------------------------------------------------------
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             if (button_state == SDL_BUTTON_LEFT && g->left_player_serving) {
@@ -87,7 +87,7 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
     // Allow mouse and keyboard input at the same time. Keep the mouse position
     // in sync.
     if (g->mouse.needs_warp) {
-        warp_mouse(window, g);
+        warp_mouse(g);
     }
     // Scale mouse movement to the render texture.
     int x = 0;
@@ -105,168 +105,165 @@ void handle_events(SDL_Window *window, GameState *g, bool *running) {
     }
 }
 
-void draw_segment(SDL_Renderer *renderer, GameState *g, int x0, int y0, int x,
-                  int y, int w, int h) {
+void draw_segment(GameState *g, int x0, int y0, int x, int y, int w, int h) {
     SDL_Rect segment;
     segment.x = x0 + x * g->pixel_w;
     segment.y = y0 + y * g->pixel_h;
     segment.w = w * g->pixel_w;
     segment.h = h * g->pixel_h;
-    SDL_RenderFillRect(renderer, &segment);
+    SDL_RenderFillRect(g->renderer, &segment);
 }
 
-void draw_segment_A(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment(renderer, g, x0, y0, 0, 0, 4, 1);
+void draw_segment_A(GameState *g, int x0, int y0) {
+    draw_segment(g, x0, y0, 0, 0, 4, 1);
 }
 
-void draw_segment_B(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment(renderer, g, x0, y0, 3, 0, 1, 3);
+void draw_segment_B(GameState *g, int x0, int y0) {
+    draw_segment(g, x0, y0, 3, 0, 1, 3);
 }
 
-void draw_segment_C(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment(renderer, g, x0, y0, 3, 3, 1, 5);
+void draw_segment_C(GameState *g, int x0, int y0) {
+    draw_segment(g, x0, y0, 3, 3, 1, 5);
 }
 
-void draw_segment_D(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment(renderer, g, x0, y0, 0, 7, 4, 1);
+void draw_segment_D(GameState *g, int x0, int y0) {
+    draw_segment(g, x0, y0, 0, 7, 4, 1);
 }
 
-void draw_segment_E(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment(renderer, g, x0, y0, 0, 3, 1, 5);
+void draw_segment_E(GameState *g, int x0, int y0) {
+    draw_segment(g, x0, y0, 0, 3, 1, 5);
 }
 
-void draw_segment_F(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment(renderer, g, x0, y0, 0, 0, 1, 3);
+void draw_segment_F(GameState *g, int x0, int y0) {
+    draw_segment(g, x0, y0, 0, 0, 1, 3);
 }
 
-void draw_segment_G(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment(renderer, g, x0, y0, 0, 3, 4, 1);
+void draw_segment_G(GameState *g, int x0, int y0) {
+    draw_segment(g, x0, y0, 0, 3, 4, 1);
 }
 
-void draw_0(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_A(renderer, g, x0, y0);
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
-    draw_segment_D(renderer, g, x0, y0);
-    draw_segment_E(renderer, g, x0, y0);
-    draw_segment_F(renderer, g, x0, y0);
+void draw_0(GameState *g, int x0, int y0) {
+    draw_segment_A(g, x0, y0);
+    draw_segment_B(g, x0, y0);
+    draw_segment_C(g, x0, y0);
+    draw_segment_D(g, x0, y0);
+    draw_segment_E(g, x0, y0);
+    draw_segment_F(g, x0, y0);
 }
 
-void draw_1(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
+void draw_1(GameState *g, int x0, int y0) {
+    draw_segment_B(g, x0, y0);
+    draw_segment_C(g, x0, y0);
 }
 
-void draw_2(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_A(renderer, g, x0, y0);
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_D(renderer, g, x0, y0);
-    draw_segment_E(renderer, g, x0, y0);
-    draw_segment_G(renderer, g, x0, y0);
+void draw_2(GameState *g, int x0, int y0) {
+    draw_segment_A(g, x0, y0);
+    draw_segment_B(g, x0, y0);
+    draw_segment_D(g, x0, y0);
+    draw_segment_E(g, x0, y0);
+    draw_segment_G(g, x0, y0);
 }
 
-void draw_3(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_A(renderer, g, x0, y0);
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
-    draw_segment_D(renderer, g, x0, y0);
-    draw_segment_G(renderer, g, x0, y0);
+void draw_3(GameState *g, int x0, int y0) {
+    draw_segment_A(g, x0, y0);
+    draw_segment_B(g, x0, y0);
+    draw_segment_C(g, x0, y0);
+    draw_segment_D(g, x0, y0);
+    draw_segment_G(g, x0, y0);
 }
 
-void draw_4(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
-    draw_segment_F(renderer, g, x0, y0);
-    draw_segment_G(renderer, g, x0, y0);
+void draw_4(GameState *g, int x0, int y0) {
+    draw_segment_B(g, x0, y0);
+    draw_segment_C(g, x0, y0);
+    draw_segment_F(g, x0, y0);
+    draw_segment_G(g, x0, y0);
 }
 
-void draw_5(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_A(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
-    draw_segment_D(renderer, g, x0, y0);
-    draw_segment_F(renderer, g, x0, y0);
-    draw_segment_G(renderer, g, x0, y0);
+void draw_5(GameState *g, int x0, int y0) {
+    draw_segment_A(g, x0, y0);
+    draw_segment_C(g, x0, y0);
+    draw_segment_D(g, x0, y0);
+    draw_segment_F(g, x0, y0);
+    draw_segment_G(g, x0, y0);
 }
 
-void draw_6(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_C(renderer, g, x0, y0);
-    draw_segment_D(renderer, g, x0, y0);
-    draw_segment_E(renderer, g, x0, y0);
-    draw_segment_F(renderer, g, x0, y0);
-    draw_segment_G(renderer, g, x0, y0);
+void draw_6(GameState *g, int x0, int y0) {
+    draw_segment_C(g, x0, y0);
+    draw_segment_D(g, x0, y0);
+    draw_segment_E(g, x0, y0);
+    draw_segment_F(g, x0, y0);
+    draw_segment_G(g, x0, y0);
 }
 
-void draw_7(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_A(renderer, g, x0, y0);
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
+void draw_7(GameState *g, int x0, int y0) {
+    draw_segment_A(g, x0, y0);
+    draw_segment_B(g, x0, y0);
+    draw_segment_C(g, x0, y0);
 }
 
-void draw_8(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_A(renderer, g, x0, y0);
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
-    draw_segment_D(renderer, g, x0, y0);
-    draw_segment_E(renderer, g, x0, y0);
-    draw_segment_F(renderer, g, x0, y0);
-    draw_segment_G(renderer, g, x0, y0);
+void draw_8(GameState *g, int x0, int y0) {
+    draw_segment_A(g, x0, y0);
+    draw_segment_B(g, x0, y0);
+    draw_segment_C(g, x0, y0);
+    draw_segment_D(g, x0, y0);
+    draw_segment_E(g, x0, y0);
+    draw_segment_F(g, x0, y0);
+    draw_segment_G(g, x0, y0);
 }
 
-void draw_9(SDL_Renderer *renderer, GameState *g, int x0, int y0) {
-    draw_segment_A(renderer, g, x0, y0);
-    draw_segment_B(renderer, g, x0, y0);
-    draw_segment_C(renderer, g, x0, y0);
-    draw_segment_F(renderer, g, x0, y0);
-    draw_segment_G(renderer, g, x0, y0);
+void draw_9(GameState *g, int x0, int y0) {
+    draw_segment_A(g, x0, y0);
+    draw_segment_B(g, x0, y0);
+    draw_segment_C(g, x0, y0);
+    draw_segment_F(g, x0, y0);
+    draw_segment_G(g, x0, y0);
 }
 
-void draw_digit(SDL_Renderer *renderer, GameState *g, int digits, int x0,
-                int y0) {
+void draw_digit(GameState *g, int digits, int x0, int y0) {
     switch (digits) {
     case 0:
-        draw_0(renderer, g, x0, y0);
+        draw_0(g, x0, y0);
         break;
     case 1:
-        draw_1(renderer, g, x0, y0);
+        draw_1(g, x0, y0);
         break;
     case 2:
-        draw_2(renderer, g, x0, y0);
+        draw_2(g, x0, y0);
         break;
     case 3:
-        draw_3(renderer, g, x0, y0);
+        draw_3(g, x0, y0);
         break;
     case 4:
-        draw_4(renderer, g, x0, y0);
+        draw_4(g, x0, y0);
         break;
     case 5:
-        draw_5(renderer, g, x0, y0);
+        draw_5(g, x0, y0);
         break;
     case 6:
-        draw_6(renderer, g, x0, y0);
+        draw_6(g, x0, y0);
         break;
     case 7:
-        draw_7(renderer, g, x0, y0);
+        draw_7(g, x0, y0);
         break;
     case 8:
-        draw_8(renderer, g, x0, y0);
+        draw_8(g, x0, y0);
         break;
     case 9:
-        draw_9(renderer, g, x0, y0);
+        draw_9(g, x0, y0);
         break;
     }
 }
 
-void draw_digits(SDL_Renderer *renderer, GameState *g, int digits, int x0,
-                 int y0) {
+void draw_digits(GameState *g, int digits, int x0, int y0) {
     digits = digits % 1000;
     int i0 = (int)(digits % 10);
     int i10 = (int)((digits / 10) % 10);
     int i100 = (int)((digits / 100) % 10);
-    draw_digit(renderer, g, i0, x0, y0);
+    draw_digit(g, i0, x0, y0);
     if (digits > 9)
-        draw_digit(renderer, g, i10, x0 - 8, y0);
+        draw_digit(g, i10, x0 - 8, y0);
     if (digits > 99)
-        draw_digit(renderer, g, i100, x0 - 16, y0);
+        draw_digit(g, i100, x0 - 16, y0);
 }
 
 void retro_to_native_disp(GameState *g, int *x, int *y) {
@@ -279,19 +276,19 @@ void native_to_retro_disp(GameState *g, int *x, int *y) {
     *y = (*y * g->retro_disp_h) / g->native_disp_h;
 }
 
-void warp_mouse(SDL_Window *window, GameState *g) {
+void warp_mouse(GameState *g) {
     g->mouse.y = g->left_paddle.rect.y + g->left_paddle.rect.h / 2;
     int x = 0;
     int y = g->mouse.y;
     retro_to_native_disp(g, &x, &y);
-    SDL_WarpMouseInWindow(window, g->native_disp_w / 2, y);
+    SDL_WarpMouseInWindow(g->window, g->native_disp_w / 2, y);
     g->left_paddle.ms_vy = 0;
     g->mouse.needs_warp = false;
 }
 
 // Update display size in case the user has changed it.
-void update_display_size(SDL_Window *window, GameState *g) {
-    SDL_GetWindowSize(window, &g->native_disp_w, &g->native_disp_h);
+void update_display_size(GameState *g) {
+    SDL_GetWindowSize(g->window, &g->native_disp_w, &g->native_disp_h);
     SDL_ShowCursor(SDL_DISABLE);
 }
 
@@ -309,8 +306,9 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
     // Do some jittering to make sure the agent does not hit the ball always in
     // the middle of the pad.
     // int jitter = (int)(rand() % (int)max_jitter);
-    // printf("distance %d, paddle.normal: %d, max_jitter: %d\n", distance, paddle->normal, max_jitter);
-    // Don't let the ball pass by when heading straight to the pad.
+    // printf("distance %d, paddle.normal: %d, max_jitter: %d\n", distance,
+    // paddle->normal, max_jitter); Don't let the ball pass by when heading
+    // straight to the pad.
     if (abs(g->ball.vy) == 0) {
         max_jitter = (max_jitter > 2) ? 1 : max_jitter;
     }
@@ -330,7 +328,7 @@ void update_left_agent(GameState *g) {
     int jitter = 0;
     int delta = (g->left_score - g->right_score);
     if (delta > 0) {
-        jitter = (delta < 7) ? delta : 7; 
+        jitter = (delta < 7) ? delta : 7;
     }
     update_agent(g, &(g->left_paddle), jitter);
 }
@@ -339,7 +337,7 @@ void update_right_agent(GameState *g) {
     int jitter = 0;
     int delta = (g->right_score - g->left_score);
     if (delta > 0) {
-        jitter = (delta < 7) ? delta : 7; 
+        jitter = (delta < 7) ? delta : 7;
     }
     update_agent(g, &(g->right_paddle), jitter);
 }
@@ -366,12 +364,12 @@ void update_ball_position(GameState *g) {
     if (g->ball.rect.y <= 0) {
         g->ball.vy = -g->ball.vy;
         g->ball.rect.y = 0;
-        Mix_PlayChannel(-1, g->snd_bounce, 0);
+        // Mix_PlayChannel(-1, g->snd_bounce, 0);
     }
     if (g->ball.rect.y >= (g->retro_disp_h - g->ball.rect.h)) {
         g->ball.vy = -g->ball.vy;
         g->ball.rect.y = g->retro_disp_h - g->ball.rect.h;
-        Mix_PlayChannel(-1, g->snd_bounce, 0);
+        // Mix_PlayChannel(-1, g->snd_bounce, 0);
     }
 }
 
@@ -383,7 +381,7 @@ void update_scores(GameState *g) {
         g->ball.vy = 0;
         g->left_player_serving = true;
         g->serving_timer = SDL_GetTicks64() + g->serving_duration;
-        Mix_PlayChannel(-1, g->snd_score, 0);
+        // Mix_PlayChannel(-1, g->snd_score, 0);
     }
     if (g->ball.rect.x >= (g->retro_disp_w - g->ball.rect.w)) {
         g->left_score++;
@@ -391,7 +389,7 @@ void update_scores(GameState *g) {
         g->ball.vy = 0;
         g->right_player_serving = true;
         g->serving_timer = SDL_GetTicks64() + g->serving_duration;
-        Mix_PlayChannel(-1, g->snd_score, 0);
+        // Mix_PlayChannel(-1, g->snd_score, 0);
     }
     if (g->left_player_serving) {
         g->ball.rect.x = g->left_paddle.rect.x + g->left_paddle.rect.w;
@@ -434,7 +432,7 @@ void update__collision(GameState *g, Paddle *paddle) {
         } else {
             g->ball.rect.x = g->right_paddle.rect.x - g->ball.rect.w;
         }
-        Mix_PlayChannel(-1, g->snd_pad, 0);
+        // Mix_PlayChannel(-1, g->snd_pad, 0);
     }
 }
 
@@ -460,7 +458,7 @@ void _update_collision_detections(GameState *g) {
         g->ball.vy = -(rel / g->pixel_h + mid_y) * g->ball_speed;
         g->ball.vx = (1 + mid_x) * g->ball_speed;
         g->ball.rect.x = g->left_paddle.rect.x + g->left_paddle.rect.w;
-        Mix_PlayChannel(-1, g->snd_pad, 0);
+        // Mix_PlayChannel(-1, g->snd_pad, 0);
     }
     if (SDL_HasIntersection(&g->ball.rect, &g->right_paddle.rect)) {
         int rel = (g->right_paddle.rect.y + g->right_paddle.rect.h / 2) -
@@ -472,30 +470,31 @@ void _update_collision_detections(GameState *g) {
         g->ball.vy = -(rel / g->pixel_h) * g->ball_speed;
         g->ball.vx = -(1 + mid_x) * g->ball_speed;
         g->ball.rect.x = g->right_paddle.rect.x - g->ball.rect.w;
-        Mix_PlayChannel(-1, g->snd_pad, 0);
+        // Mix_PlayChannel(-1, g->snd_pad, 0);
     }
 }
 
 void update(GameState *g) {
     update_ball_position(g);
     update_right_agent(g);
-    // update_left_agent(g);
+    update_left_agent(g);
     update_paddles(g);
     update_scores(g);
     update_collision_detections(g);
 }
 
-void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g) {
+void draw(GameState *g) {
     // Set renderer to the offline texture.
-    SDL_SetRenderTarget(renderer, texture);
+    SDL_SetRenderTarget(g->renderer, g->texture);
     // Set color and clear the render context.
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);
-    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(g->renderer, 0x00, 0x00, 0x00, 0xff);
+    SDL_RenderClear(g->renderer);
     // Set the current render color.
-    SDL_SetRenderDrawColor(renderer, g->color.r, g->color.g, g->color.b, 255);
-    SDL_RenderFillRect(renderer, &g->left_paddle.rect);
-    SDL_RenderFillRect(renderer, &g->right_paddle.rect);
-    SDL_RenderFillRect(renderer, &g->ball.rect);
+    SDL_SetRenderDrawColor(g->renderer, g->color.r, g->color.g, g->color.b,
+                           255);
+    SDL_RenderFillRect(g->renderer, &g->left_paddle.rect);
+    SDL_RenderFillRect(g->renderer, &g->right_paddle.rect);
+    SDL_RenderFillRect(g->renderer, &g->ball.rect);
     // Render net
     SDL_Rect block;
     // block.w = g->pixel_w / 4;
@@ -504,20 +503,19 @@ void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g) {
     block.x = g->retro_disp_w / 2 - block.w / 2;
     for (int i = 0; i < g->native_disp_h; i += 3 * g->pixel_h) {
         block.y = i;
-        SDL_RenderFillRect(renderer, &block);
+        SDL_RenderFillRect(g->renderer, &block);
     }
     // Draw scores
-    draw_digits(renderer, g, g->left_score, g->left_score_pos.x,
-                g->left_score_pos.y);
-    draw_digits(renderer, g, g->right_score, g->right_score_pos.x,
-                g->right_score_pos.y);
-    // Set renderer to the screen and copy/scale the texture on screen.
-    SDL_SetRenderTarget(renderer, NULL);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
+    draw_digits(g, g->left_score, g->left_score_pos.x, g->left_score_pos.y);
+    draw_digits(g, g->right_score, g->right_score_pos.x, g->right_score_pos.y);
+    // Set g->renderer to the screen and copy/scale the texture on screen.
+    SDL_SetRenderTarget(g->renderer, NULL);
+    SDL_RenderCopy(g->renderer, g->texture, NULL, NULL);
+    SDL_RenderPresent(g->renderer);
 }
 
 void init_game_state(GameState *g) {
+    g->running = false;
     g->vsync = false;
     g->target_fps = 60;
     g->retro_disp_w = 100;
@@ -525,10 +523,10 @@ void init_game_state(GameState *g) {
 #ifdef __EMSCRIPTEN__
     g->fullscreen = false;
 #else
-    g->fullscreen = true;
+    g->fullscreen = false;
 #endif
-    g->native_disp_w = 500;
-    g->native_disp_h = 400;
+    g->native_disp_w = 100;
+    g->native_disp_h = 80;
     g->pixel_w = 1;
     g->pixel_h = 1;
     g->ball_speed = g->pixel_w; // * 60 / g->target_fps;
@@ -562,7 +560,7 @@ void init_game_state(GameState *g) {
     g->ball.rect.h = g->pixel_h;
     g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
     g->ball.rect.y = g->retro_disp_h / 2 - g->ball.rect.h / 2;
-    int direction = (rand() % 2 == 0) ? 1 : -1; 
+    int direction = (rand() % 2 == 0) ? 1 : -1;
     g->ball.vx = direction * g->ball_speed;
     g->ball.vy = rand() % 3 - 1;
     g->serving_timer = ULONG_MAX;
@@ -586,6 +584,15 @@ void launch_ball(int player, GameState *g) {
     g->serving_timer = ULONG_MAX;
 }
 
+void main_loop(void *arg) {
+    GameState *g = (GameState *)arg;
+    update_display_size(g);
+    handle_events(g);
+    update(g);
+    draw(g);
+    g->frame_count++;
+}
+
 int main(int argc, char *argv[]) {
     // Init variables
     SDL_Renderer *renderer = NULL;
@@ -593,13 +600,6 @@ int main(int argc, char *argv[]) {
     SDL_Texture *texture = NULL;
     GameState g;
     init_game_state(&g);
-
-    // time sync variables
-    unsigned long tic = 0;
-    unsigned long toc = 0;
-    unsigned long chrono_frame = 0;
-    unsigned long millis_per_frame = 1000 / g.target_fps;
-    bool running = false;
 
     int status = SDL_Init(SDL_INIT_VIDEO);
     if (status < 0) {
@@ -626,7 +626,10 @@ int main(int argc, char *argv[]) {
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                                 SDL_TEXTUREACCESS_TARGET, g.retro_disp_w,
                                 g.retro_disp_h);
-    update_display_size(window, &g);
+    g.window = window;
+    g.renderer = renderer;
+    g.texture = texture;
+    update_display_size(&g);
     // Init sound
     status = Mix_Init(0);
     if (status < 0) {
@@ -638,7 +641,7 @@ int main(int argc, char *argv[]) {
     g.snd_pad = Mix_LoadWAV("pad.wav");
     g.snd_score = Mix_LoadWAV("score.wav");
     // Init mouse
-    warp_mouse(window, &g);
+    warp_mouse(&g);
     // Info to console
     printf("Resolution: (%d, %d)\n", display_mode.w, display_mode.h);
     printf("Refresh rate: %d\n", display_mode.refresh_rate);
@@ -653,17 +656,22 @@ int main(int argc, char *argv[]) {
     printf("Renderer supports rendering to texture: %d\n",
            ((info.flags & SDL_RENDERER_TARGETTEXTURE) ==
             SDL_RENDERER_TARGETTEXTURE));
-    // Fixes bug that shoots ball too fast due to initializing on the background.
+    // Fixes bug that shoots ball too fast due to initializing on the
+    // background.
     unsigned long start_game = SDL_GetTicks64() + 500;
-    while(SDL_GetTicks64() < start_game)
+    while (SDL_GetTicks64() < start_game)
         SDL_Delay(100);
-    running = true;
-    while (running) {
+    g.running = true;
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(main_loop, &g, g.target_fps, (int)g.running);
+#else
+    while (g.running) {
+        unsigned long tic = 0;
+        unsigned long toc = 0;
+        unsigned long chrono_frame = 0;
+        unsigned long millis_per_frame = 1000 / g.target_fps;
         tic = SDL_GetTicks64();
-        update_display_size(window, &g);
-        handle_events(window, &g, &running);
-        update(&g);
-        draw(renderer, texture, &g);
+        main_loop(&g);
         toc = SDL_GetTicks64();
         chrono_frame = toc - tic;
         if (chrono_frame > 20)
@@ -675,12 +683,18 @@ int main(int argc, char *argv[]) {
             if (sleep_time > 0 && sleep_time < 1000)
                 SDL_Delay(sleep_time);
         }
-        g.frame_count++;
     }
+#endif
     // Exit gracefully.
     SDL_DestroyRenderer(renderer);
     SDL_DestroyTexture(texture);
     SDL_DestroyWindow(window);
+    g.renderer = NULL;
+    g.window = NULL;
+    g.texture = NULL;
+    renderer = NULL;
+    window = NULL;
+    texture = NULL;
     SDL_Quit();
 
     return 0;

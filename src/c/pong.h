@@ -1,5 +1,5 @@
 //    Retro Tennis
-//    Copyright (C) 2022  Gilbert Francois Duivesteijn
+//    Copyright (C) 2023  Gilbert Francois Duivesteijn
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -17,12 +17,15 @@
 #ifndef PONG_H_FILE
 #define PONG_H_FILE
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 
 typedef struct {
     int x;
@@ -51,6 +54,10 @@ typedef struct {
 } Ball;
 
 typedef struct {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    bool running;
     bool vsync;
     unsigned long frame_count;
     int target_fps;
@@ -84,38 +91,39 @@ typedef struct {
 void init_game_state(GameState *g);
 void retro_to_native_disp(GameState *g, int *x, int *y);
 void native_to_retro_disp(GameState *g, int *x, int *y);
-void handle_events(SDL_Window *window, GameState *g, bool *running);
-void update_display_size(SDL_Window *window, GameState *g);
+void handle_events(GameState *g);
+void update_display_size(GameState *g);
 void update(GameState *g);
 void update_paddle(GameState *g, Paddle *paddle);
 void update_ball_position(GameState *g);
 void update_scores(GameState *g);
 void update_collision_detections(GameState *g);
 void update_right_agent(GameState *g);
-void draw(SDL_Renderer *renderer, SDL_Texture *texture, GameState *g);
-void draw_segment_A(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_segment_B(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_segment_C(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_segment_D(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_segment_E(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_segment_F(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_segment_G(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_0(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_1(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_2(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_3(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_4(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_5(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_6(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_7(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_8(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_9(SDL_Renderer *renderer, GameState *g, int x0, int y0);
-void draw_digit(SDL_Renderer *renderer, GameState *g, int digits, int x0, int y0);
+void draw(GameState *g);
+void draw_segment_A(GameState *g, int x0, int y0);
+void draw_segment_B(GameState *g, int x0, int y0);
+void draw_segment_C(GameState *g, int x0, int y0);
+void draw_segment_D(GameState *g, int x0, int y0);
+void draw_segment_E(GameState *g, int x0, int y0);
+void draw_segment_F(GameState *g, int x0, int y0);
+void draw_segment_G(GameState *g, int x0, int y0);
+void draw_0(GameState *g, int x0, int y0);
+void draw_1(GameState *g, int x0, int y0);
+void draw_2(GameState *g, int x0, int y0);
+void draw_3(GameState *g, int x0, int y0);
+void draw_4(GameState *g, int x0, int y0);
+void draw_5(GameState *g, int x0, int y0);
+void draw_6(GameState *g, int x0, int y0);
+void draw_7(GameState *g, int x0, int y0);
+void draw_8(GameState *g, int x0, int y0);
+void draw_9(GameState *g, int x0, int y0);
+void draw_digit(GameState *g, int digits, int x0, int y0);
 
-/* void drawLabel(SDL_Renderer *renderer, GameState *g, char *text, int x, int
+/* void drawLabel(GameState *g, char *text, int x, int
  * y); */
+void main_loop(void *arg);
 void launch_ball(int player, GameState *g);
-void warp_mouse(SDL_Window *window, GameState *g);
+void warp_mouse(GameState *g);
 
 int main(int argc, char *argv[]);
 
