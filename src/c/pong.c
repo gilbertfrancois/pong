@@ -14,14 +14,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "pong.h"
-#include "SDL2/SDL_render.h"
-#include "SDL2/SDL_video.h"
-#include <SDL_mixer.h>
-#include <SDL_scancode.h>
-#include <SDL_timer.h>
-#include <limits.h>
-
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#include <stdint.h>
 
 void handle_events(SDL_Window *window, GameState *g, bool *running) {
     SDL_Event event;
@@ -305,19 +298,17 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
     // method 1:
     // ball dir: 1=left attacking, -1=right attacking
     int ball_dir = (g->ball.vx > 0) ? 1 : ((g->ball.vx < 0) ? -1 : 0);
-    // paddle_pos: 1=left, -1=right
-    int paddle_pos = paddle->rect.x < g->retro_disp_w / 2 ? 1 : -1;
     // 1=even frame, 0=odd frame
     int even_frame = (int)(g->frame_count % 2);
     // Let agent move slower when attacking, faster when defending.
-    int take_it_easy = (ball_dir * paddle_pos * even_frame == 1) ? 0 : 1;
+    int take_it_easy = (ball_dir * paddle->normal * even_frame == 1) ? 0 : 1;
     // Distance between pad and ball.
     int distance = (paddle->rect.y + paddle->rect.h / 2) -
                    (g->ball.rect.y + g->ball.rect.h / 2);
     // Do some jittering to make sure the agent does not hit the ball always in
     // the middle of the pad.
     // int jitter = (int)(rand() % (int)max_jitter);
-    printf("distance %d, paddle_pos: %d, max_jitter: %d\n", distance, paddle_pos, max_jitter);
+    // printf("distance %d, paddle.normal: %d, max_jitter: %d\n", distance, paddle->normal, max_jitter);
     // Don't let the ball pass by when heading straight to the pad.
     if (abs(g->ball.vy) == 0) {
         max_jitter = (max_jitter > 2) ? 1 : max_jitter;
@@ -370,14 +361,6 @@ void update_ball_position(GameState *g) {
     // Update ball position
     g->ball.rect.x += g->ball.vx;
     g->ball.rect.y += g->ball.vy;
-    // if (abs(g->ball.vx) > 1 && abs(g->ball.vy) > 0) {
-    //     g->ball.rect.x += g->ball.vx / 2;
-    //     g->ball.rect.y += g->ball.vy * (int)(g->frame_count % 2);
-    // }
-    // else {
-    //     g->ball.rect.x += g->ball.vx;
-    //     g->ball.rect.y += g->ball.vy;
-    // }
     // Bounce agaist horizontal walls.
     if (g->ball.rect.y <= 0) {
         g->ball.vy = -g->ball.vy;
@@ -409,9 +392,6 @@ void update_scores(GameState *g) {
         g->serving_timer = SDL_GetTicks64() + g->serving_duration;
         Mix_PlayChannel(-1, g->snd_score, 0);
     }
-    // const Uint64 timeout = SDL_GetTicks64() + 100;
-    // while (SDL_GetTicks64() < timeout) {
-    //     // ... do work until timeout has elapsed
     if (g->left_player_serving) {
         g->ball.rect.x = g->left_paddle.rect.x + g->left_paddle.rect.w;
         g->ball.rect.y = g->left_paddle.rect.y + g->right_paddle.rect.h / 2 +
@@ -541,12 +521,12 @@ void init_game_state(GameState *g) {
     g->target_fps = 60;
     g->retro_disp_w = 100;
     g->retro_disp_h = 80;
-    g->fullscreen = false;
+    g->fullscreen = true;
     g->native_disp_w = 500;
     g->native_disp_h = 400;
     g->pixel_w = 1;
     g->pixel_h = 1;
-    g->ball_speed = g->pixel_w * 60 / g->target_fps;
+    g->ball_speed = g->pixel_w; // * 60 / g->target_fps;
     g->paddle_speed = g->ball_speed * 2;
     g->color.r = 255;
     g->color.g = 255;
@@ -557,6 +537,7 @@ void init_game_state(GameState *g) {
     g->left_paddle.rect.y = g->retro_disp_h / 2 - g->left_paddle.rect.h / 2;
     g->left_paddle.kb_vy = 0;
     g->left_paddle.ms_vy = 0;
+    g->left_paddle.normal = 1;
     g->right_paddle.rect.w = g->left_paddle.rect.w;
     g->right_paddle.rect.h = g->left_paddle.rect.h;
     g->right_paddle.rect.x =
@@ -564,6 +545,7 @@ void init_game_state(GameState *g) {
     g->right_paddle.rect.y = g->left_paddle.rect.y;
     g->right_paddle.kb_vy = 0;
     g->right_paddle.ms_vy = 0;
+    g->right_paddle.normal = -1;
     g->left_score = 0;
     g->left_score_pos.x =
         g->left_paddle.rect.x + 3 * g->pixel_w + 8 + g->pixel_w;
@@ -571,15 +553,17 @@ void init_game_state(GameState *g) {
     g->right_score = 0;
     g->right_score_pos.x = g->right_paddle.rect.x - 5 * g->pixel_w;
     g->right_score_pos.y = 2 * g->pixel_h;
-
     g->ball.rect.w = g->pixel_w;
     g->ball.rect.h = g->pixel_h;
     g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
     g->ball.rect.y = g->retro_disp_h / 2 - g->ball.rect.h / 2;
-    g->ball.vx = -g->ball_speed;
-    g->ball.vy = rand() % 2 - 1;
-    g->serving_timer = SDL_GetTicks64() + g->serving_duration;
+    int direction = (rand() % 2 == 0) ? 1 : -1; 
+    g->ball.vx = direction * g->ball_speed;
+    g->ball.vy = rand() % 3 - 1;
+    g->serving_timer = INT64_MAX;
     g->serving_duration = 2000;
+    g->left_player_serving = false;
+    g->right_player_serving = false;
 }
 
 void launch_ball(int player, GameState *g) {
@@ -594,7 +578,7 @@ void launch_ball(int player, GameState *g) {
     }
     g->left_player_serving = false;
     g->right_player_serving = false;
-    g->serving_timer = LONG_MAX;
+    g->serving_timer = INT64_MAX;
 }
 
 int main(int argc, char *argv[]) {
@@ -650,7 +634,6 @@ int main(int argc, char *argv[]) {
     warp_mouse(window, &g);
     // Info to console
     printf("Resolution: (%d, %d)\n", display_mode.w, display_mode.h);
-    // printf("Pixel format: %u\n", current.format);
     printf("Refresh rate: %d\n", display_mode.refresh_rate);
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer, &info);
@@ -663,10 +646,10 @@ int main(int argc, char *argv[]) {
     printf("Renderer supports rendering to texture: %d\n",
            ((info.flags & SDL_RENDERER_TARGETTEXTURE) ==
             SDL_RENDERER_TARGETTEXTURE));
-    // Begin event loop
-    // int vsync = ((info.flags & SDL_RENDERER_PRESENTVSYNC) ==
-    // SDL_RENDERER_PRESENTVSYNC);
-
+    // Fixes bug that shoots ball too fast due to initializing on the background.
+    unsigned long start_game = SDL_GetTicks64() + 500;
+    while(SDL_GetTicks64() < start_game)
+        SDL_Delay(100);
     running = true;
     while (running) {
         tic = SDL_GetTicks64();
@@ -676,6 +659,8 @@ int main(int argc, char *argv[]) {
         draw(renderer, texture, &g);
         toc = SDL_GetTicks64();
         chrono_frame = toc - tic;
+        if (chrono_frame > 20)
+            printf("WARNING chrono: %lu\n", chrono_frame);
         if (!g.vsync) {
             // Software vsync
             unsigned int sleep_time =

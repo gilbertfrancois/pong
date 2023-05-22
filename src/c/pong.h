@@ -19,7 +19,6 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
-#include <SDL_rect.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +37,8 @@ typedef struct {
     int kb_vy;
     // y velocity from mouse input
     int ms_vy;
+    // Normal or "playing direction": 1=left to right, -1=right to left
+    int normal;
 } Paddle;
 
 typedef struct {
@@ -48,14 +49,6 @@ typedef struct {
     // y velocity
     int vy;
 } Ball;
-
-typedef struct {
-    bool key_up;
-    bool key_down;
-    int timer_key;
-    int timer_button;
-    int timer_service;
-} Agent;
 
 typedef struct {
     bool vsync;
@@ -79,8 +72,6 @@ typedef struct {
     Paddle left_paddle;
     Paddle right_paddle;
     Ball ball;
-    SDL_Rect score_board;
-    char *score;
     int left_score;
     int right_score;
     SDL_Point left_score_pos;
