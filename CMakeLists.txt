@@ -13,16 +13,16 @@ set(CMAKE_TOOLCHAIN_FILE
 project(pong)
 
 find_package(SDL2 CONFIG REQUIRED)
-find_package(SDL2_ttf CONFIG REQUIRED)
+# find_package(SDL2_ttf CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
 
 if(DEFINED EMSCRIPTEN)
-  add_executable(pong src/c/pong.c)
+  add_executable(pong src/c/pong.c src/c/digit.c src/c/sound.c)
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
   set_target_properties(pong PROPERTIES COMPILE_FLAGS " -s USE_SDL=2 ")
   # set_target_properties(main PROPERTIES LINK_FLAGS "-Os -s WASM=1 -s SIDE_MODULE=1 -s STANDALONE_WASM --no-entry")
 else()
-  add_executable(pong src/c/pong.c)
+  add_executable(pong src/c/pong.c src/c/digit.c src/c/sound.c)
 endif()
 
 target_link_libraries(
@@ -30,16 +30,17 @@ target_link_libraries(
   PRIVATE
     $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-    $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
+    # $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
 )
 
 install(TARGETS pong DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-file(COPY ${CMAKE_SOURCE_DIR}/resources/sound/bounce.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-file(COPY ${CMAKE_SOURCE_DIR}/resources/sound/pad.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-file(COPY ${CMAKE_SOURCE_DIR}/resources/sound/score.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/bounce.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/pad.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/score.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
 if(DEFINED EMSCRIPTEN)
   install(FILES ${CMAKE_BINARY_DIR}/pong.wasm DESTINATION ${CMAKE_SOURCE_DIR}/dist)
   install(FILES ${CMAKE_SOURCE_DIR}/src/html/index.html DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  install(FILES ${CMAKE_SOURCE_DIR}/src/css/index.css DESTINATION ${CMAKE_SOURCE_DIR}/dist)
 endif()
 
