@@ -163,9 +163,9 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
     // ball dir: 1=left attacking, -1=right attacking
     int ball_dir = (g->ball.vx > 0) ? 1 : ((g->ball.vx < 0) ? -1 : 0);
     // 1=even frame, 0=odd frame
-    int even_frame = (int)(g->frame_count % (2*g->vsync_divider));
+    int even_frame = (int)(g->frame_count % (2*g->vsync_divider)) == 0 ? 1 : 0;
     // Let agent move slower when attacking, faster when defending.
-    int take_it_easy = (ball_dir * paddle->normal * even_frame == 1) ? 0 : 1;
+    int take_it_easy = (ball_dir * paddle->normal * even_frame == 1) ? 1 : 0;
     // Distance between pad and ball.
     int distance = (paddle->rect.y + paddle->rect.h / 2) -
                    (g->ball.rect.y + g->ball.rect.h / 2);
