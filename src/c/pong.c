@@ -165,7 +165,7 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
     // 1=even frame, 0=odd frame
     int even_frame = (int)(g->frame_count % (2*g->vsync_divider)) == 0 ? 1 : 0;
     // Let agent move slower when attacking, faster when defending.
-    int take_it_easy = (ball_dir * paddle->normal * even_frame == 1) ? 1 : 0;
+    int move = (ball_dir * paddle->normal * even_frame == 1) ? 1 : 0;
     // Distance between pad and ball.
     int distance = (paddle->rect.y + paddle->rect.h / 2) -
                    (g->ball.rect.y + g->ball.rect.h / 2);
@@ -179,10 +179,10 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
         max_jitter = (max_jitter > 2) ? 1 : max_jitter;
     }
     if (distance < -1 * max_jitter) {
-        paddle->kb_vy = g->ball_speed * take_it_easy;
+        paddle->kb_vy = g->ball_speed * move;
         paddle->ms_vy = 0;
     } else if (distance > 1 * max_jitter) {
-        paddle->kb_vy = -g->ball_speed * take_it_easy;
+        paddle->kb_vy = -g->ball_speed * move;
         paddle->ms_vy = 0;
     } else {
         paddle->kb_vy = 0;
