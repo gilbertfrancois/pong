@@ -32,6 +32,7 @@
 
 void handle_events(GameState *g);
 void init_game_state(GameState *g);
+void init_players_state(GameState *g);
 void retro_to_native_disp(GameState *g, int *x, int *y);
 void native_to_retro_disp(GameState *g, int *x, int *y);
 void update_display_size(GameState *g);

@@ -61,12 +61,31 @@ void handle_events(GameState *g) {
                 keystates[SDL_SCANCODE_MINUS]) {
                 if (g->vsync_divider < 5)
                     g->vsync_divider++;
+                SDL_Log("vsync_divider: %d", g->vsync_divider);
             }
             if (keystates[SDLK_PLUS] || keystates[SDLK_KP_PLUS] ||
                 keystates[SDL_SCANCODE_EQUALS]) {
                 if (g->vsync_divider > 1)
                     g->vsync_divider--;
+                SDL_Log("vsync_divider: %d", g->vsync_divider);
             }
+            if (keystates[SDL_SCANCODE_R]) {
+                init_players_state(g);
+            }
+            if (keystates[SDL_SCANCODE_0]) {
+                init_players_state(g);
+                g->number_of_players = 0;
+            }
+            if (keystates[SDL_SCANCODE_1]) {
+                init_players_state(g);
+                g->number_of_players = 1;
+            }
+            if (keystates[SDL_SCANCODE_2]) {
+                init_players_state(g);
+                g->number_of_players = 2;
+            }
+
+
         }
         if (event.type == SDL_KEYUP) {
             if (!keystates[SDL_SCANCODE_UP] && g->left_paddle.kb_vy < 0) {
@@ -169,12 +188,7 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
     // Distance between pad and ball.
     int distance = (paddle->rect.y + paddle->rect.h / 2) -
                    (g->ball.rect.y + g->ball.rect.h / 2);
-    // Do some jittering to make sure the agent does not hit the ball always in
-    // the middle of the pad.
-    // int jitter = (int)(arc4random() % (int)max_jitter);
-    // printf("distance %d, paddle.normal: %d, max_jitter: %d\n", distance,
-    // paddle->normal, max_jitter); Don't let the ball pass by when heading
-    // straight to the pad.
+    // Don't let the ball pass by when heading straight to the pad.
     if (abs(g->ball.vy) == 0) {
         max_jitter = (max_jitter > 2) ? 1 : max_jitter;
     }
@@ -309,8 +323,12 @@ void update_collision_detections(GameState *g) {
 
 void update(GameState *g) {
     update_ball_position(g);
-    update_right_agent(g);
-    update_left_agent(g);
+    if (g->number_of_players == 0 || g->number_of_players == 1) {
+        update_right_agent(g);
+    }
+    if (g->number_of_players == 0) {
+        update_left_agent(g);
+    }
     update_paddles(g);
     update_scores(g);
     update_collision_detections(g);
@@ -371,6 +389,9 @@ void init_game_state(GameState *g) {
     g->color.r = 255;
     g->color.g = 255;
     g->color.b = 255;
+}
+
+void init_players_state(GameState *g) {
     g->left_paddle.rect.w = g->pixel_w;
     g->left_paddle.rect.h = g->pixel_h * 5;
     g->left_paddle.rect.x = 9 * g->pixel_w;
@@ -397,8 +418,9 @@ void init_game_state(GameState *g) {
     g->ball.rect.h = g->pixel_h;
     g->ball.rect.x = g->retro_disp_w / 2 - g->ball.rect.w / 2;
     g->ball.rect.y = g->retro_disp_h / 2 - g->ball.rect.h / 2;
-    g->ball.vx = 0; //direction * g->ball_speed;
-    g->ball.vy = 0; //arc4random() % 3 - 1;
+    g->ball.vx = 0;
+    g->ball.vy = 0;
+    g->number_of_players = 0;
     g->serving_duration = 2000;
     g->serving_timer = SDL_GetTicks64() + g->serving_duration;
     g->left_player_serving = false;
@@ -433,6 +455,7 @@ int main(int argc, char *argv[]) {
     SDL_Texture *texture = NULL;
     GameState g;
     init_game_state(&g);
+    init_players_state(&g);
 
     int status = SDL_Init(SDL_INIT_VIDEO);
     if (status < 0) {
@@ -505,7 +528,7 @@ int main(int argc, char *argv[]) {
         main_loop(&g);
         toc = SDL_GetTicks64();
         chrono_frame = toc - tic;
-        if (chrono_frame > 20)
+        if (chrono_frame > 30)
             SDL_Log("chrono: %lu\n", chrono_frame);
         if (!g.vsync) {
             // Software vsync

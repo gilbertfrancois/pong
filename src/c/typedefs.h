@@ -55,6 +55,7 @@ typedef struct {
     int pixel_h;
     int ball_speed;
     int paddle_speed;
+    int number_of_players;
     bool left_player_serving;
     bool right_player_serving;
     bool start_game_serving;
