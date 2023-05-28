@@ -165,7 +165,7 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
     // 1=even frame, 0=odd frame
     int even_frame = (int)(g->frame_count % (2*g->vsync_divider)) == 0 ? 1 : 0;
     // Let agent move slower when attacking, faster when defending.
-    int move = (ball_dir * paddle->normal * even_frame == 1) ? 1 : 0;
+    int move = (ball_dir * paddle->normal * even_frame == 1) ? 0 : 1;
     // Distance between pad and ball.
     int distance = (paddle->rect.y + paddle->rect.h / 2) -
                    (g->ball.rect.y + g->ball.rect.h / 2);
@@ -407,10 +407,6 @@ void init_game_state(GameState *g) {
 }
 
 void launch_ball(GameState *g, int direction) {
-    SDL_Log("Launch ball at direction %d\n", direction);
-    if (direction != 1 || direction != -1) {
-        SDL_Log("Value error.");
-    }
     g->ball.vy = ((arc4random() % 2) - 1) * g->ball_speed;
     g->ball.vx = direction * g->ball_speed;
     g->left_player_serving = false;
