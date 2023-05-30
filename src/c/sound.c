@@ -7,8 +7,7 @@ int init_sound() {
         printf("Failed at Mix_Init()");
         exit(status);
     }
-    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 1024);
-    return 0;
+    return Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 1024);
 }
 
 int load_sound(GameState *g) {
@@ -16,4 +15,23 @@ int load_sound(GameState *g) {
     g->snd_pad = Mix_LoadWAV("pad.wav");
     g->snd_score = Mix_LoadWAV("score.wav");
     return 0;
+}
+
+int play_sound(Mix_Chunk *sound) {
+    if (Mix_PlayChannel(-1, sound, 0) != -1)
+        return 0;
+    return 1;
+}
+
+int play_bounce(GameState *g) {
+    return play_sound(g->snd_bounce);
+}
+
+int play_score(GameState *g) {
+    return play_sound(g->snd_score);
+}
+
+
+int play_pad(GameState *g) {
+    return play_sound(g->snd_pad);
 }

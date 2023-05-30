@@ -18,14 +18,12 @@
 #define PONG_H_FILE
 
 #include "typedefs.h"
+#include "sound.h"
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
 #include <SDL2/SDL.h>
-#ifdef __SOUND__
-#include <SDL2/SDL_mixer.h>
-#endif
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

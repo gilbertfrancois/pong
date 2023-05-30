@@ -1,12 +1,9 @@
 #ifndef TYPEDEFS_H_FILE
 #define TYPEDEFS_H_FILE
 
-#define __SOUND__
 
 #include <SDL2/SDL.h>
-#ifdef __SOUND__
 #include <SDL2/SDL_mixer.h>
-#endif
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,11 +67,9 @@ typedef struct {
     int right_score;
     SDL_Point left_score_pos;
     SDL_Point right_score_pos;
-#ifdef __SOUND__
     Mix_Chunk *snd_bounce;
     Mix_Chunk *snd_score;
     Mix_Chunk *snd_pad;
-#endif
 } GameState;
 
 #endif

@@ -1,34 +1,46 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <meta name="description" content="Pong, the classic game from 1972. Author: Gilbert Francois" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1"
+    />
+    <meta
+      name="description"
+      content="Pong, the classic game from 1972. Author: Gilbert Francois"
+    />
     <meta name="theme-color" content="#101010" />
     <!-- <link rel="icon" href="../assets/favicon/favicon.ico" /> -->
     <!-- <link rel="apple-touch-icon" href="../assets/favicon/apple-touch-icon.png"> -->
     <!-- <link rel="manifest" href="app.webmanifest" /> -->
     <link rel="stylesheet" href="index.css" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>BLiTzBLiT :: Pong</title>
-</head>
-<body>
+  </head>
+  <body>
     <div class="game-border">
-        <div class="game-canvas">
-    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      <div class="game-canvas">
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      </div>
     </div>
-    </div>
-    <script type='text/javascript'>
-        var Module = {
-            canvas: (function() { return document.getElementById('canvas'); })()
-        };
-        console.log("Res from js: (" + document.querySelector("#canvas").width);
+    <script type="text/javascript">
+      var Module = {
+        canvas: (function () {
+          return document.getElementById("canvas");
+        })(),
+      };
+
+      function run_wasm() {
+        WebAssembly.instantiateStreaming(fetch("pong.wasm"), {}).then((lib) => {
+          lib.instance.exports.main();
+        });
+      }
+
     </script>
-    <script src="pong.js"></script>
-    <script>
-        console.log("Res from js: (" + document.querySelector("#canvas").width);
-    </script>
+    <!-- <script src="pong.js"></script> -->
+    <button onclick="run_wasm()">click me</button>
     <p>Pong</p>
-</body>
+  </body>
 </html>

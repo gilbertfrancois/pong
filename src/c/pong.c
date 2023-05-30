@@ -244,12 +244,12 @@ void update_ball_position(GameState *g) {
     if (g->ball.rect.y <= 0) {
         g->ball.vy = -g->ball.vy;
         g->ball.rect.y = 0;
-        // Mix_PlayChannel(-1, g->snd_bounce, 0);
+        play_bounce(g);
     }
     if (g->ball.rect.y >= (g->retro_disp_h - g->ball.rect.h)) {
         g->ball.vy = -g->ball.vy;
         g->ball.rect.y = g->retro_disp_h - g->ball.rect.h;
-        // Mix_PlayChannel(-1, g->snd_bounce, 0);
+        play_bounce(g);
     }
 }
 
@@ -261,7 +261,7 @@ void update_scores(GameState *g) {
         g->ball.vy = 0;
         g->left_player_serving = true;
         g->serving_timer = SDL_GetTicks64() + g->serving_duration;
-        // Mix_PlayChannel(-1, g->snd_score, 0);
+        play_score(g);
     }
     if (g->ball.rect.x >= (g->retro_disp_w - g->ball.rect.w)) {
         g->left_score++;
@@ -269,7 +269,7 @@ void update_scores(GameState *g) {
         g->ball.vy = 0;
         g->right_player_serving = true;
         g->serving_timer = SDL_GetTicks64() + g->serving_duration;
-        // Mix_PlayChannel(-1, g->snd_score, 0);
+        play_score(g);
     }
     if (g->left_player_serving) {
         g->ball.rect.x = g->left_paddle.rect.x + g->left_paddle.rect.w;
@@ -312,7 +312,7 @@ void update__collision(GameState *g, Paddle *paddle) {
         } else {
             g->ball.rect.x = g->right_paddle.rect.x - g->ball.rect.w;
         }
-        // Mix_PlayChannel(-1, g->snd_pad, 0);
+        play_pad(g);
     }
 }
 
@@ -486,10 +486,8 @@ int main(int argc, char *argv[]) {
     g.renderer = renderer;
     g.texture = texture;
     update_display_size(&g);
-#ifdef __SOUND__
     init_sound();
     load_sound(&g);
-#endif
     // Init mouse
     warp_mouse(&g);
     // Info to console

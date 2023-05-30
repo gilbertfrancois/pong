@@ -7,9 +7,7 @@
 #endif
 
 #include <SDL2/SDL.h>
-#ifdef __SOUND__
 #include <SDL2/SDL_mixer.h>
-#endif
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,8 +15,8 @@
 int init_sound();
 int load_sound(GameState *g);
 
-int play_bounce();
-int play_score();
-int play_pad();
+int play_bounce(GameState *g);
+int play_score(GameState *g);
+int play_pad(GameState *g);
 
 #endif
