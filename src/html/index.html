@@ -31,16 +31,10 @@
           return document.getElementById("canvas");
         })(),
       };
-
-      function run_wasm() {
-        WebAssembly.instantiateStreaming(fetch("pong.wasm"), {}).then((lib) => {
-          lib.instance.exports.main();
-        });
-      }
-
     </script>
-    <!-- <script src="pong.js"></script> -->
-    <button onclick="run_wasm()">click me</button>
-    <p>Pong</p>
+    <script src="pong.js"></script>
+    <!-- <div class="overlay"> -->
+    <!-- <button onclick="loadScript()">click me</button> -->
+    <!-- </div> -->
   </body>
 </html>
