@@ -20,6 +20,7 @@
 #include <SDL_scancode.h>
 #include <limits.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 void handle_events(GameState *g) {
     SDL_Event event;
@@ -84,8 +85,6 @@ void handle_events(GameState *g) {
                 init_players_state(g);
                 g->number_of_players = 2;
             }
-
-
         }
         if (event.type == SDL_KEYUP) {
             if (!keystates[SDL_SCANCODE_UP] && g->left_paddle.kb_vy < 0) {
@@ -128,7 +127,7 @@ void handle_events(GameState *g) {
     g->mouse.y = y;
     // Trigger serving after timeout
     if (g->start_game_serving && SDL_GetTicks64() > g->serving_timer) {
-        int direction = (arc4random() % 2 == 0) ? 1 : -1;
+        int direction = (rand() % 2 == 0) ? 1 : -1;
         launch_ball(g, direction);
     }
     if (g->left_player_serving && SDL_GetTicks64() > g->serving_timer) {
@@ -182,7 +181,8 @@ void update_agent(GameState *g, Paddle *paddle, int max_jitter) {
     // ball dir: 1=left attacking, -1=right attacking
     int ball_dir = (g->ball.vx > 0) ? 1 : ((g->ball.vx < 0) ? -1 : 0);
     // 1=even frame, 0=odd frame
-    int even_frame = (int)(g->frame_count % (2*g->vsync_divider)) == 0 ? 1 : 0;
+    int even_frame =
+        (int)(g->frame_count % (2 * g->vsync_divider)) == 0 ? 1 : 0;
     // Let agent move slower when attacking, faster when defending.
     int move = (ball_dir * paddle->normal * even_frame == 1) ? 0 : 1;
     // Distance between pad and ball.
@@ -297,7 +297,7 @@ void update__collision(GameState *g, Paddle *paddle) {
         int mid_y = 0;
         if (rel == 0) {
             mid_x = 0;
-            mid_y = arc4random() % 3 - 1;
+            mid_y = rand() % 3 - 1;
             if (mid_y != 0)
                 mid_x = 1;
         }
@@ -429,7 +429,7 @@ void init_players_state(GameState *g) {
 }
 
 void launch_ball(GameState *g, int direction) {
-    g->ball.vy = ((arc4random() % 2) - 1) * g->ball_speed;
+    g->ball.vy = ((rand() % 2) - 1) * g->ball_speed;
     g->ball.vx = direction * g->ball_speed;
     g->left_player_serving = false;
     g->right_player_serving = false;
