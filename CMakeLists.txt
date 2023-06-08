@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-if(WITH_WASM)
+if(WASM)
   set(VCPKG_TARGET_TRIPLET "wasm32-emscripten")
   set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE
       "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
@@ -19,7 +19,8 @@ find_package(SDL2_mixer CONFIG REQUIRED)
 if(DEFINED EMSCRIPTEN)
   add_executable(pong src/c/pong.c src/c/digit.c src/c/sound.c)
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
-  set_target_properties(pong PROPERTIES COMPILE_FLAGS " -s USE_SDL=2 ")
+  set_target_properties(pong PROPERTIES COMPILE_FLAGS " -s USE_SDL=2 -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$autoResumeAudioContext ")
+  set_target_properties(pong PROPERTIES LINK_FLAGS " -s USE_SDL=2 -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$autoResumeAudioContext ")
   # set_target_properties(main PROPERTIES LINK_FLAGS "-Os -s WASM=1 -s SIDE_MODULE=1 -s STANDALONE_WASM --no-entry")
 else()
   add_executable(pong src/c/pong.c src/c/digit.c src/c/sound.c)
