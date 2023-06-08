@@ -8,6 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+enum stage {
+    STAGE_INTRO,
+    STAGE_PLAYING
+};
+
 typedef struct {
     int x;
     int y;
@@ -40,6 +45,7 @@ typedef struct {
     SDL_Texture *texture;
     bool running;
     bool vsync;
+    int game_stage;
     int vsync_divider;
     unsigned long frame_count;
     int target_fps;

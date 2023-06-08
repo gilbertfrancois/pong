@@ -441,13 +441,26 @@ void launch_ball(GameState *g, int direction) {
 
 void main_loop(void *arg) {
     GameState *g = (GameState *)arg;
+    switch (g->game_stage) {
+    case STAGE_INTRO:
+        main_loop_intro(g);
+        break;
+    case STAGE_PLAYING:
+        main_loop_playing(g);
+        break;
+    }
+    g->frame_count++;
+}
+
+void main_loop_intro(GameState *g) {}
+
+void main_loop_playing(GameState *g) {
     if (g->frame_count % g->vsync_divider == 0) {
         update_display_size(g);
         handle_events(g);
         update(g);
     }
     draw(g);
-    g->frame_count++;
 }
 
 int main(int argc, char *argv[]) {

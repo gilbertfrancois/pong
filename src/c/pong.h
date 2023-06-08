@@ -47,6 +47,8 @@ void update_right_agent(GameState *g);
 void draw_digits(GameState *g, int digits, int x0, int y0);
 void draw(GameState *g);
 void main_loop(void *arg);
+void main_loop_intro(GameState *g);
+void main_loop_playing(GameState *g);
 void launch_ball(GameState *g, int direction);
 void warp_mouse(GameState *g);
 
