@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 void handle_events(GameState *g);
 void init_game_state(GameState *g);

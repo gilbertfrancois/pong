@@ -16,11 +16,7 @@
 #include "pong.h"
 #include "digit.h"
 #include "sound.h"
-#include <SDL_keycode.h>
-#include <SDL_scancode.h>
 #include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 void handle_events(GameState *g) {
     SDL_Event event;
@@ -59,14 +55,12 @@ void handle_events(GameState *g) {
                 SDL_SetWindowFullscreen(g->window, flags);
             }
             if (keystates[SDLK_MINUS] || 
-                keystates[SDLK_KP_MINUS] ||
                 keystates[SDL_SCANCODE_MINUS]) {
                 if (g->vsync_divider < 5)
                     g->vsync_divider++;
                 SDL_Log("vsync_divider: %d", g->vsync_divider);
             }
             if (keystates[SDLK_PLUS] || 
-                keystates[SDLK_KP_PLUS] ||
                 keystates[SDL_SCANCODE_EQUALS]) {
                 if (g->vsync_divider > 1)
                     g->vsync_divider--;
