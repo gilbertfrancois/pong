@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-enum stage {
-    STAGE_INTRO,
-    STAGE_PLAYING
+enum GameMode {
+    MODE_INTRO,
+    MODE_PLAYING
 };
 
 typedef struct {
@@ -40,12 +40,12 @@ typedef struct {
 } Ball;
 
 typedef struct {
+    // Display parameters
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
-    bool running;
+    SDL_Color color;
     bool vsync;
-    int game_stage;
     int vsync_divider;
     unsigned long frame_count;
     int target_fps;
@@ -53,29 +53,36 @@ typedef struct {
     int retro_disp_h; //  80
     int native_disp_w;
     int native_disp_h;
-    bool fullscreen;
     int pixel_w;
     int pixel_h;
+    bool fullscreen;
+    // Game parameters
+    enum GameMode game_mode;
+    bool running;
+    Ball ball;
     int ball_speed;
+    Paddle left_paddle;
+    Paddle right_paddle;
     int paddle_speed;
+    // Player parameters
     int number_of_players;
     bool left_player_serving;
     bool right_player_serving;
     bool start_game_serving;
     unsigned long serving_timer;
     unsigned long serving_duration;
-    SDL_Color color;
-    Mouse mouse;
-    Paddle left_paddle;
-    Paddle right_paddle;
-    Ball ball;
+    // Score
     int left_score;
     int right_score;
     SDL_Point left_score_pos;
     SDL_Point right_score_pos;
+    // Sound
+    bool sound_activated;
     Mix_Chunk *snd_bounce;
     Mix_Chunk *snd_score;
     Mix_Chunk *snd_pad;
-} GameState;
+    // Human Input Devices
+    Mouse mouse;
+} Context;
 
 #endif

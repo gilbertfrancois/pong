@@ -13,10 +13,11 @@
 #include <stdlib.h>
 
 int init_sound();
-int load_sound(GameState *g);
+int load_sound(Context *ctx);
+int play_sound(Context *ctx, Mix_Chunk *sound);
 
-int play_bounce(GameState *g);
-int play_score(GameState *g);
-int play_pad(GameState *g);
+int play_bounce(Context *ctx);
+int play_score(Context *ctx);
+int play_pad(Context *ctx);
 
 #endif

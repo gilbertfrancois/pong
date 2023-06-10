@@ -17,41 +17,53 @@
 #ifndef PONG_H_FILE
 #define PONG_H_FILE
 
-#include "typedefs.h"
 #include "sound.h"
+#include "typedefs.h"
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 
-void handle_events(GameState *g);
-void init_game_state(GameState *g);
-void init_players_state(GameState *g);
-void retro_to_native_disp(GameState *g, int *x, int *y);
-void native_to_retro_disp(GameState *g, int *x, int *y);
-void update_display_size(GameState *g);
-void update(GameState *g);
-void update_left_agent(GameState *g);
-void update_right_agent(GameState *g);
-void update_paddle(GameState *g, Paddle *paddle);
-void update_paddles(GameState *g);
-void update_ball_position(GameState *g);
-void update_scores(GameState *g);
-void update__collision(GameState *g, Paddle *paddle);
-void update_collision_detections(GameState *g);
-void update_right_agent(GameState *g);
-void draw_digits(GameState *g, int digits, int x0, int y0);
-void draw(GameState *g);
+void init_context(Context *ctx);
+void init_ball(Context *ctx);
+void init_paddles(Context *ctx);
+void init_score(Context *ctx);
+void init_stage_intro(Context *ctx);
+void init_stage_playing(Context *ctx);
+
+void update(Context *ctx);
+void update_agent(Context *ctx, Paddle *paddle, int max_jitter);
+void update_ball_position(Context *ctx);
+void update_bouncing_ball(Context *ctx);
+void update_collision(Context *ctx, Paddle *paddle);
+void update_collision_detections(Context *ctx);
+void update_display_size(Context *ctx);
+void update_left_agent(Context *ctx);
+void update_right_agent(Context *ctx);
+void update_mode_intro(Context *ctx);
+void update_mode_playing(Context *ctx);
+void update_paddle(Context *ctx, Paddle *paddle);
+void update_paddles(Context *ctx);
+void update_scores(Context *ctx);
+
+void draw(Context *ctx);
+void draw_digits(Context *ctx, int digits, int x0, int y0);
+void draw_stage_intro(Context *ctx);
+void draw_stage_playing(Context *ctx);
+
 void main_loop(void *arg);
-void main_loop_intro(GameState *g);
-void main_loop_playing(GameState *g);
-void launch_ball(GameState *g, int direction);
-void warp_mouse(GameState *g);
+
+void handle_events(Context *ctx);
+void launch_ball(Context *ctx, int direction);
+void native_to_retro_disp(Context *ctx, int *x, int *y);
+void retro_to_native_disp(Context *ctx, int *x, int *y);
+void switch_game_mode(Context *ctx, enum GameMode target_game_mode);
+void warp_mouse(Context *ctx);
 
 int main(int argc, char *argv[]);
 
