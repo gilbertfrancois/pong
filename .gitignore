@@ -108,3 +108,4 @@ tags
 compile_commands.json
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,macos,vim,c++
+/dist
