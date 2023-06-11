@@ -10,7 +10,7 @@ This program runs as a native desktop application or in the browser as a WebAsse
 
 
 
-| ![](/Users/gilbert/Development/git/retro-tennis/resources/images/native.png) | ![](/Users/gilbert/Development/git/retro-tennis/resources/images/browser.png) |
+| ![](./resources/images/native.png) | ![](./resources/images/browser.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Native application                                           | WebAssembly in the browser                                   |
 
