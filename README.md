@@ -64,7 +64,7 @@ cd dist
 
 ## Building the game as WebAssembly application
 
-Compiling for the web requires some more steps. First build the C code:
+Compiling for the web requires some more steps. First build the C code with cmake, then the web code with npm:
 
 ```sh
 git clone https://github.com/gilbertfrancois/retro-tennis.git
