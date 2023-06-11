@@ -16,25 +16,15 @@ find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
 
 if(DEFINED EMSCRIPTEN)
-  add_executable(pong src/c/pong.c src/c/digit.c src/c/sound.c)
-  set(CMAKE_EXECUTABLE_SUFFIX ".js")
-  set(CMAKE_C_FLAGS
-      "-s USE_SDL=2 "
-      "-s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$autoResumeAudioContext "
-      "--preload-file ./bounce.wav "
-      "--preload-file ./pad.wav "
-      "--preload-file ./score.wav ")
   # Files to be preloaded and packed in the pong.data file.
-  file(COPY_FILE ${CMAKE_SOURCE_DIR}/resources/sound/bounce.wav
-       ${CMAKE_BINARY_DIR}/bounce.wav)
-  file(COPY_FILE ${CMAKE_SOURCE_DIR}/resources/sound/pad.wav
-       ${CMAKE_BINARY_DIR}/pad.wav)
-  file(COPY_FILE ${CMAKE_SOURCE_DIR}/resources/sound/score.wav
-       ${CMAKE_BINARY_DIR}/score.wav)
-else()
-  add_executable(pong src/c/pong.c src/c/digit.c src/c/sound.c)
+  file(COPY_FILE ${CMAKE_SOURCE_DIR}/resources/sound/bounce.wav ${CMAKE_BINARY_DIR}/bounce.wav)
+  file(COPY_FILE ${CMAKE_SOURCE_DIR}/resources/sound/pad.wav ${CMAKE_BINARY_DIR}/pad.wav)
+  file(COPY_FILE ${CMAKE_SOURCE_DIR}/resources/sound/score.wav ${CMAKE_BINARY_DIR}/score.wav)
+  set(CMAKE_EXECUTABLE_SUFFIX ".js")
+  set(CMAKE_C_FLAGS "-s USE_SDL=2 -s ENVIRONMENT='web' -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$autoResumeAudioContext --preload-file ./bounce.wav --preload-file ./pad.wav --preload-file ./score.wav ")
 endif()
 
+add_executable(pong app/src/pong.c app/src/digit.c app/src/sound.c)
 target_link_libraries(
   pong
   PRIVATE
@@ -42,20 +32,14 @@ target_link_libraries(
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
 )
 
-install(TARGETS pong DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/bounce.wav
-        DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/pad.wav
-        DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/score.wav
-        DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+
 if(DEFINED EMSCRIPTEN)
-  install(FILES ${CMAKE_BINARY_DIR}/pong.wasm
-          DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-  install(FILES ${CMAKE_BINARY_DIR}/pong.data
-          DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-  install(FILES ${CMAKE_SOURCE_DIR}/src/html/index.html
-          DESTINATION ${CMAKE_SOURCE_DIR}/dist)
-  install(FILES ${CMAKE_SOURCE_DIR}/src/css/index.css
-          DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  install(TARGETS pong DESTINATION ${CMAKE_SOURCE_DIR}/web/src)
+  install(FILES ${CMAKE_BINARY_DIR}/pong.wasm DESTINATION ${CMAKE_SOURCE_DIR}/web/src)
+  install(FILES ${CMAKE_BINARY_DIR}/pong.data DESTINATION ${CMAKE_SOURCE_DIR}/web/src)
+else()
+  install(TARGETS pong DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/bounce.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/pad.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  install(FILES ${CMAKE_SOURCE_DIR}/resources/sound/score.wav DESTINATION ${CMAKE_SOURCE_DIR}/dist)
 endif()

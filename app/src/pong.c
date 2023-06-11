@@ -119,6 +119,8 @@ void init_stage_playing(Context *ctx) {
     init_paddles(ctx);
     init_ball(ctx);
     init_score(ctx);
+    ctx->ball.rect.x = ctx->native_disp_w / 2;
+    ctx->ball.rect.y = ctx->native_disp_h / 2;
     ctx->number_of_players = 0;
     ctx->serving_duration = 2000;
     ctx->serving_timer = SDL_GetTicks64() + ctx->serving_duration;
@@ -426,13 +428,6 @@ void handle_events(Context *ctx) {
             if (keystates[SDL_SCANCODE_M] && ctx->right_player_serving) {
                 launch_ball(ctx, -1);
             }
-            if (keystates[SDL_SCANCODE_F]) {
-                unsigned int flags = 0;
-                ctx->fullscreen = !ctx->fullscreen;
-                if (ctx->fullscreen)
-                    flags = SDL_WINDOW_FULLSCREEN;
-                SDL_SetWindowFullscreen(ctx->window, flags);
-            }
             if (keystates[SDLK_MINUS] || keystates[SDL_SCANCODE_MINUS]) {
                 if (ctx->vsync_divider < 5)
                     ctx->vsync_divider++;
@@ -477,6 +472,15 @@ void handle_events(Context *ctx) {
                 ctx->right_paddle.kb_vy = 0;
             }
         }
+#ifndef __EMSCRIPTEN__
+        if (keystates[SDL_SCANCODE_F]) {
+            unsigned int flags = 0;
+            ctx->fullscreen = !ctx->fullscreen;
+            if (ctx->fullscreen)
+                flags = SDL_WINDOW_FULLSCREEN;
+            SDL_SetWindowFullscreen(ctx->window, flags);
+        }
+#endif
         if (event.type == SDL_QUIT || keystates[SDL_SCANCODE_ESCAPE] ||
             keystates[SDL_SCANCODE_Q]) {
             ctx->running = false;
