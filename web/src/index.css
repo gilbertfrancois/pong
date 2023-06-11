@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    /* Prevent bounce effect on mobile devices */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior-y: none;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 0.8125rem;
+    margin: 0;
+    color: white;
+    background-color: black;
+}
+
+.game-border {
+    position: absolute;
+    overflow: hidden;
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    height: 100svh;
+    left: 0;
+    top: 0;
+    background-color: rgb(16, 16, 16);
+}
+
+.game-canvas {
+    z-index: 1;
+    overflow:hidden;
+    height: 95%;
+    aspect-ratio: 5/4;
+    margin: auto;
+    background-color: black;
+}
+
+.game-canvas canvas {
+    z-index: 1;
+    position: relative;
+    overflow: hidden;
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+}
+#imageviewer-canvas {
+    z-index: 2;
+    overflow:hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: visible;
+    width: 100vw;
+    height: 100vh;
+    height: 100svh;
+    /* height: 70%; */
+    /* aspect-ratio: 4/3; */
+    /* margin: auto; */
+    background-color: rgb(1, 1, 1);
+    /* background-color: rgb(89, 89, 89); */
+}
+
+#imageviewer-canvas img {
+    z-index: 2;
+    position: relative;
+    overflow: hidden;
+    /* object-fit: contain; */
+    /* object-fit: contain; */
+    max-width: 100%;
+    max-height: 100%;
+}
+

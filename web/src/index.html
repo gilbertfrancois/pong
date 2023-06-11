@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1"
+    />
+    <meta
+      name="description"
+      content="Pong, the classic game from 1972. Author: Gilbert Francois"
+    />
+    <!-- <meta name="theme-color" content="#101010" /> -->
+    <link rel="stylesheet" href="index.css" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>BLiTzBLiT :: Pong</title>
+    <script type="text/javascript">
+      function toggle_visibility() {
+        var e = document.getElementById("imageviewer-canvas");
+        console.log(e.style.visibility);
+        e.style.visibility = "hidden";
+        console.log(e.style.visibility);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="game-border">
+      <div class="game-canvas">
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      </div>
+    </div>
+    <div id="imageviewer-canvas">
+      <img src="keymap.jpg" alt="Keymap" onclick="toggle_visibility()"/>
+    </div>
+    <script type="text/javascript">
+      var Module = {
+        canvas: (function () {
+          return document.getElementById("canvas");
+        })(),
+      };
+    </script>
+    <script src="pong.js"></script>
+  </body>
+</html>
