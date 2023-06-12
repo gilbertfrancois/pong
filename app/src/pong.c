@@ -119,8 +119,10 @@ void init_stage_playing(Context *ctx) {
     init_paddles(ctx);
     init_ball(ctx);
     init_score(ctx);
-    ctx->ball.rect.x = ctx->native_disp_w / 2;
-    ctx->ball.rect.y = ctx->native_disp_h / 2;
+    ctx->ball.rect.x = ctx->retro_disp_w / 2;
+    ctx->ball.rect.y = ctx->retro_disp_h / 2;
+    ctx->ball.vx = 0;
+    ctx->ball.vy = 0;
     ctx->number_of_players = 0;
     ctx->serving_duration = 2000;
     ctx->serving_timer = SDL_GetTicks64() + ctx->serving_duration;
