@@ -8,15 +8,14 @@ _Retro Tennis, (also known as Pong) is a table tennis–themed twitch arcade spo
 
 This program runs as a native desktop application or in the browser as a WebAssembly application.
 
-
-
-
 | ![Desktop](./resources/images/native.png) | ![Web](./resources/images/browser.png) |
 | ----------------------------------------- | -------------------------------------- |
 | Native application                        | WebAssembly in the browser             |
 
 
+## Live demo
 
+[https://pong.blitzblit.org](https://pong.blitzblit.org)
 
 ## Keymaps
 
