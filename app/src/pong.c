@@ -28,7 +28,7 @@ void init_context(Context *ctx) {
     ctx->color.g = 255;
     ctx->color.b = 255;
     ctx->vsync = false;
-    ctx->vsync_divider = 1;
+    ctx->vsync_divider = 2;
     ctx->frame_count = 0;
     ctx->target_fps = 60;
     ctx->retro_disp_w = 100;
