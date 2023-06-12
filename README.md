@@ -10,9 +10,11 @@ This program runs as a native desktop application or in the browser as a WebAsse
 
 
 
+
 | ![Desktop](./resources/images/native.png) | ![Web](./resources/images/browser.png) |
 | ----------------------------------------- | -------------------------------------- |
 | Native application                        | WebAssembly in the browser             |
+
 
 
 
@@ -64,7 +66,7 @@ cd dist
 
 ## Building the game as WebAssembly application
 
-Compiling for the web requires some more steps. First build the C code:
+Compiling for the web requires some more steps. First build the C code with cmake, then the web code with npm:
 
 ```sh
 git clone https://github.com/gilbertfrancois/retro-tennis.git
