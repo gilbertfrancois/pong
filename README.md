@@ -10,9 +10,11 @@ This program runs as a native desktop application or in the browser as a WebAsse
 
 
 
-| ![](./resources/images/native.png) | ![](./resources/images/browser.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Native application                                           | WebAssembly in the browser                                   |
+
+| ![Desktop](./resources/images/native.png) | ![Web](./resources/images/browser.png) |
+| ----------------------------------------- | -------------------------------------- |
+| Native application                        | WebAssembly in the browser             |
+
 
 
 
