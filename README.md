@@ -15,7 +15,7 @@ This program runs as a native desktop application or in the browser as a WebAsse
 
 ## Live demo
 
-[https://pong.blitzblit.org](https://pong.blitzblit.org)
+[https://pong.blitzblit.com](https://pong.blitzblit.com)
 
 ## Keymaps
 
